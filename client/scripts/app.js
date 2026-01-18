@@ -78,6 +78,59 @@ function createChart(canvasId, config) {
 }
 
 // ============================================================================
+// ANIMATION UTILITIES
+// ============================================================================
+
+class CountUp {
+  constructor(element, endValue, duration = 2) {
+    this.element = element;
+    this.startValue = 0;
+    this.endValue = endValue;
+    this.duration = duration * 1000;
+    this.startTime = null;
+    this.frameRequest = null;
+    
+    // Intersection Observer to start when visible
+    this.observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        this.start();
+        this.observer.disconnect();
+      }
+    }, { threshold: 0.1 });
+    
+    if (this.element) {
+      this.observer.observe(this.element);
+    }
+  }
+
+  // Quintic ease out - smooth deceleration to mimic spring
+  easeOutQuint(x) {
+    return 1 - Math.pow(1 - x, 5);
+  }
+
+  animate(currentTime) {
+    if (!this.startTime) this.startTime = currentTime;
+    const elapsed = currentTime - this.startTime;
+    const progress = Math.min(elapsed / this.duration, 1);
+    
+    const ease = this.easeOutQuint(progress);
+    const current = Math.floor(this.startValue + (this.endValue - this.startValue) * ease);
+    
+    this.element.textContent = new Intl.NumberFormat('en-US').format(current);
+
+    if (progress < 1) {
+      this.frameRequest = requestAnimationFrame(this.animate.bind(this));
+    } else {
+      this.element.textContent = new Intl.NumberFormat('en-US').format(this.endValue);
+    }
+  }
+
+  start() {
+    this.frameRequest = requestAnimationFrame(this.animate.bind(this));
+  }
+}
+
+// ============================================================================
 // RENDER SHELL
 // ============================================================================
 
@@ -655,7 +708,13 @@ function renderSeekerJobs() {
   };
 
   content.innerHTML = `
-    <h4 class="mb-4">Job Board</h4>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h4 class="mb-0">Job Board</h4>
+      <div class="d-flex align-items-baseline">
+        <span id="jobCountDisplay" class="h2 fw-bold text-warning mb-0 me-2">0</span>
+        <span class="text-muted">available positions</span>
+      </div>
+    </div>
     
     <!-- Filters -->
     <div class="card mb-3">
@@ -848,6 +907,12 @@ function renderSeekerJobs() {
 
   // Initial Render
   renderList();
+
+  // Initialize CountUp animation
+  const countEl = document.getElementById('jobCountDisplay');
+  if (countEl) {
+    new CountUp(countEl, jobs.length, 2);
+  }
 }
 
 function renderSeekerLearning() {
