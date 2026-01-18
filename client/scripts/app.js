@@ -33,6 +33,26 @@ const navData = {
 };
 
 // ============================================================================
+// THEME MANAGEMENT
+// ============================================================================
+
+function setTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('theme', theme);
+  
+  // Re-render settings if currently on settings page to update radio buttons
+  const settingsRadio = document.getElementById('theme' + (theme.charAt(0).toUpperCase() + theme.slice(1)));
+  if (settingsRadio) {
+    settingsRadio.checked = true;
+  }
+}
+
+function initTheme() {
+  const storedTheme = localStorage.getItem('theme') || 'dark';
+  setTheme(storedTheme);
+}
+
+// ============================================================================
 // CHART LIFECYCLE MANAGEMENT
 // ============================================================================
 
@@ -78,8 +98,8 @@ function renderShell(role) {
 
   // Brand
   const brand = document.createElement('h4');
-  brand.className = 'mb-4 fw-bold';
-  brand.innerHTML = '<i class="bi bi-lightning-charge me-2"></i>TalentFlow';
+  brand.className = 'mb-4 fw-bold text-always-white d-flex align-items-center';
+  brand.innerHTML = '<img src="../resources/images/TalentFlow%20icon.png" alt="TalentFlow" style="height: 1.5rem;" class="me-2">TalentFlow';
   sidebar.appendChild(brand);
 
   // Nav pills
@@ -90,11 +110,14 @@ function renderShell(role) {
   const links = navData[role] || [];
   links.forEach((link, index) => {
     const a = document.createElement('a');
-    a.className = 'nav-link text-white mb-2';
+    // Removed 'text-white' to allow CSS to control color state
+    a.className = 'nav-link mb-2';
     a.href = '#';
     a.dataset.route = link.id;
-    a.innerHTML = `<i class="${link.icon} me-2"></i>${link.name}`;
-    if (index === 0) a.classList.add('active', 'bg-primary');
+    // Wrapped content in span for underline styling
+    a.innerHTML = `<span class="nav-item-label"><i class="${link.icon} me-2"></i>${link.name}</span>`;
+    // Removed 'bg-primary' class, using underline style instead
+    if (index === 0) a.classList.add('active');
     nav.appendChild(a);
   });
 
@@ -128,13 +151,13 @@ function renderShell(role) {
     </button>
     <i class="bi bi-bell fs-5 me-3" style="cursor: pointer;"></i>
     <div class="dropdown">
-      <a class="d-flex align-items-center text-decoration-none dropdown-toggle text-dark" href="#" data-bs-toggle="dropdown">
+      <a class="d-flex align-items-center text-decoration-none dropdown-toggle text-dark" href="#" data-bs-toggle="dropdown" data-bs-display="static">
         <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 35px; height: 35px;">AC</div>
         <span>Alex Chen</span>
       </a>
-      <ul class="dropdown-menu dropdown-menu-end">
+      <ul class="dropdown-menu dropdown-menu-end animate-slide">
         <li><a class="dropdown-item" href="#">Profile</a></li>
-        <li><a class="dropdown-item" href="#">Settings</a></li>
+        <li><a class="dropdown-item" href="#" onclick="navigate('settings'); return false;">Settings</a></li>
         <li><hr class="dropdown-divider"></li>
         <li><a class="dropdown-item" href="#">Logout</a></li>
       </ul>
@@ -172,9 +195,11 @@ function setupNavListeners() {
 
     // Update active state
     nav.querySelectorAll('.nav-link').forEach(l => {
-      l.classList.remove('active', 'bg-primary');
+      // Removed bg-primary removal as we don't add it anymore
+      l.classList.remove('active');
     });
-    link.classList.add('active', 'bg-primary');
+    // Removed bg-primary addition
+    link.classList.add('active');
 
     // Navigate
     navigate(link.dataset.route);
@@ -184,6 +209,17 @@ function setupNavListeners() {
 function navigate(routeId) {
   // Destroy existing charts before rendering new content
   destroyAllCharts();
+
+  // Handle special routes that aren't sidebar links
+  if (routeId === 'settings') {
+    // Clear sidebar active state
+    const nav = document.getElementById('main-nav');
+    if (nav) {
+      nav.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+    }
+    renderSettings();
+    return;
+  }
 
   const routes = {
     // Job Seeker
@@ -221,6 +257,64 @@ function switchRole(newRole) {
 }
 
 // ============================================================================
+// SETTINGS VIEW
+// ============================================================================
+
+function renderSettings() {
+  const content = document.getElementById('content-area');
+  const currentTheme = localStorage.getItem('theme') || 'dark';
+  const isDark = currentTheme === 'dark';
+
+  content.innerHTML = `
+    <h4 class="mb-4">Settings</h4>
+    <div class="row">
+      <div class="col-md-8">
+        <div class="card mb-4">
+          <div class="card-header">
+            <i class="bi bi-display me-2"></i>Appearance
+          </div>
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="mb-1">Theme Preference</h6>
+                <small class="text-muted">Switch between light and dark modes.</small>
+              </div>
+              <div class="btn-group" role="group">
+                <input type="radio" class="btn-check" name="theme-options" id="themeLight" autocomplete="off" ${!isDark ? 'checked' : ''} onchange="setTheme('light')">
+                <label class="btn btn-outline-primary" for="themeLight"><i class="bi bi-sun-fill me-1"></i>Light</label>
+
+                <input type="radio" class="btn-check" name="theme-options" id="themeDark" autocomplete="off" ${isDark ? 'checked' : ''} onchange="setTheme('dark')">
+                <label class="btn btn-outline-primary" for="themeDark"><i class="bi bi-moon-fill me-1"></i>Dark</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <i class="bi bi-bell me-2"></i>Notifications
+          </div>
+          <div class="card-body">
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" id="emailNotif" checked>
+              <label class="form-check-label" for="emailNotif">Email Notifications</label>
+            </div>
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" id="pushNotif" checked>
+              <label class="form-check-label" for="pushNotif">Push Notifications</label>
+            </div>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="marketingNotif">
+              <label class="form-check-label" for="marketingNotif">Marketing Emails</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================================
 // JOB SEEKER VIEWS
 // ============================================================================
 
@@ -231,75 +325,73 @@ function renderSeekerHome() {
     <div class="row g-4">
       <!-- Smart Match Roles -->
       <div class="col-md-4">
-        <div class="card h-100">
-          <div class="card-header bg-primary text-white">
-            <i class="bi bi-bullseye me-2"></i>Smart Match Roles
-          </div>
+        <div class="card card-uniform h-100">
           <div class="card-body">
-            <div class="accordion" id="rolesAccordion">
+            <h5 class="card-title">Smart Match Roles</h5>
+            <div class="accordion mb-3" id="rolesAccordion">
               <div class="accordion-item">
                 <h2 class="accordion-header">
                   <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#role1">
-                    <span class="badge bg-success me-2">95%</span> Senior Frontend Developer
+                    <span class="badge bg-success me-2">95%</span> Staff - Software Engineering
                   </button>
                 </h2>
                 <div id="role1" class="accordion-collapse collapse show" data-bs-parent="#rolesAccordion">
                   <div class="accordion-body small">
-                    <strong>TechCorp Inc.</strong><br>
-                    Remote · $120k-150k · React, TypeScript
+                    <strong>EY</strong><br>
+                    Dallas, TX · $85k-105k · Java, Spring Boot
                   </div>
                 </div>
               </div>
               <div class="accordion-item">
                 <h2 class="accordion-header">
                   <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#role2">
-                    <span class="badge bg-success me-2">92%</span> Full Stack Engineer
+                    <span class="badge bg-success me-2">92%</span> Senior Consultant - Cybersecurity
                   </button>
                 </h2>
                 <div id="role2" class="accordion-collapse collapse" data-bs-parent="#rolesAccordion">
                   <div class="accordion-body small">
-                    <strong>StartupXYZ</strong><br>
-                    Hybrid · $100k-130k · Node.js, React
+                    <strong>EY</strong><br>
+                    Chicago, IL · $95k-120k · Security+, CISSP
                   </div>
                 </div>
               </div>
               <div class="accordion-item">
                 <h2 class="accordion-header">
                   <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#role3">
-                    <span class="badge bg-warning text-dark me-2">87%</span> UI/UX Developer
+                    <span class="badge bg-warning text-dark me-2">87%</span> Senior Manager - Tax Technology
                   </button>
                 </h2>
                 <div id="role3" class="accordion-collapse collapse" data-bs-parent="#rolesAccordion">
                   <div class="accordion-body small">
-                    <strong>DesignHub</strong><br>
-                    On-site · $90k-110k · Figma, CSS
+                    <strong>EY</strong><br>
+                    San Jose, CA · $150k-190k · Python, SQL
                   </div>
                 </div>
               </div>
             </div>
+            <a href="#" class="explore-link" onclick="navigate('seeker-jobs'); return false;">Explore</a>
           </div>
         </div>
       </div>
       
       <!-- Skill Gap Radar -->
       <div class="col-md-4">
-        <div class="card h-100">
-          <div class="card-header bg-info text-white">
-            <i class="bi bi-diagram-3 me-2"></i>Skill Gap Analysis
-          </div>
+        <div class="card card-uniform h-100">
           <div class="card-body">
-            <canvas id="skillGapRadar"></canvas>
+            <h5 class="card-title">Skill Gap Analysis</h5>
+            <div class="flex-grow-1 d-flex align-items-center justify-content-center">
+                <canvas id="skillGapRadar" style="max-height: 250px;"></canvas>
+            </div>
+            <a href="#" class="explore-link" onclick="navigate('seeker-profile'); return false;">Explore</a>
           </div>
         </div>
       </div>
       
       <!-- Upskilling Roadmap -->
       <div class="col-md-4">
-        <div class="card h-100">
-          <div class="card-header bg-success text-white">
-            <i class="bi bi-signpost-2 me-2"></i>Upskilling Roadmap
-          </div>
+        <div class="card card-uniform h-100">
           <div class="card-body">
+            <h5 class="card-title">Upskilling Roadmap</h5>
             <div class="mb-3">
               <div class="d-flex justify-content-between mb-1">
                 <span>TypeScript Advanced</span>
@@ -336,6 +428,7 @@ function renderSeekerHome() {
                 <div class="progress-bar bg-primary" style="width: 60%;"></div>
               </div>
             </div>
+            <a href="#" class="explore-link" onclick="navigate('seeker-learning'); return false;">Explore</a>
           </div>
         </div>
       </div>
@@ -366,11 +459,31 @@ function renderSeekerHome() {
     },
     options: {
       responsive: true,
-      maintainAspectRatio: true,
+      maintainAspectRatio: false,
       scales: {
         r: {
           beginAtZero: true,
-          max: 100
+          max: 100,
+          grid: {
+            color: 'rgba(255, 255, 255, 0.1)'
+          },
+          angleLines: {
+            color: 'rgba(255, 255, 255, 0.1)'
+          },
+          pointLabels: {
+            color: '#adb5bd'
+          },
+          ticks: {
+            backdropColor: 'transparent',
+            color: '#adb5bd'
+          }
+        }
+      },
+      plugins: {
+        legend: {
+            labels: {
+                color: '#adb5bd'
+            }
         }
       }
     }
@@ -509,53 +622,232 @@ function renderSeekerProfile() {
 function renderSeekerJobs() {
   const content = document.getElementById('content-area');
   
+  // Enhanced job data with department and level for filtering
   const jobs = [
-    { title: 'Senior Frontend Developer', company: 'TechCorp Inc.', location: 'Remote', salary: '$120k-150k', fitScore: 95 },
-    { title: 'Full Stack Engineer', company: 'StartupXYZ', location: 'San Francisco, CA', salary: '$100k-130k', fitScore: 92 },
-    { title: 'UI/UX Developer', company: 'DesignHub', location: 'New York, NY', salary: '$90k-110k', fitScore: 87 },
-    { title: 'React Developer', company: 'WebSolutions', location: 'Austin, TX', salary: '$95k-120k', fitScore: 85 },
-    { title: 'JavaScript Engineer', company: 'CodeFactory', location: 'Remote', salary: '$110k-140k', fitScore: 82 }
+    { title: 'Staff - Assurance (External Audit)', company: 'EY', location: 'New York, NY', salary: '$65k-85k', fitScore: 98, department: 'Assurance', level: 'Staff / Associate' },
+    { title: 'Senior Consultant - Cybersecurity', company: 'EY', location: 'Chicago, IL', salary: '$95k-120k', fitScore: 94, department: 'Consulting', level: 'Senior Consultant / Senior Associate' },
+    { title: 'Manager - Technology Risk', company: 'EY', location: 'London, UK', salary: '$110k-140k', fitScore: 91, department: 'Assurance', level: 'Manager' },
+    { title: 'Intern - Data & Analytics', company: 'EY', location: 'Remote', salary: '$30/hr', fitScore: 88, department: 'Consulting', level: 'Intern' },
+    { title: 'Senior Manager - Strategy (EY-Parthenon)', company: 'EY', location: 'Boston, MA', salary: '$160k-200k', fitScore: 96, department: 'Strategy', level: 'Senior Manager' },
+    { title: 'Director - Business Tax Services', company: 'EY', location: 'Atlanta, GA', salary: '$180k-240k', fitScore: 89, department: 'Tax', level: 'Director' },
+    { title: 'Staff - Software Engineering', company: 'EY', location: 'Dallas, TX', salary: '$85k-105k', fitScore: 92, department: 'Internal Functions', level: 'Staff / Associate' },
+    { title: 'Associate - People Advisory Services', company: 'EY', location: 'San Francisco, CA', salary: '$75k-95k', fitScore: 85, department: 'Tax', level: 'Staff / Associate' },
+    { title: 'Partner - Transaction Diligence', company: 'EY', location: 'New York, NY', salary: '$250k+', fitScore: 97, department: 'Strategy', level: 'Partner / Principal' },
+    { title: 'Senior Associate - Supply Chain & Operations', company: 'EY', location: 'Seattle, WA', salary: '$90k-115k', fitScore: 93, department: 'Consulting', level: 'Senior Consultant / Senior Associate' },
+    { title: 'Manager - Forensic & Integrity', company: 'EY', location: 'Washington, DC', salary: '$115k-145k', fitScore: 90, department: 'Assurance', level: 'Manager' },
+    { title: 'Staff - Climate Change & Sustainability', company: 'EY', location: 'Los Angeles, CA', salary: '$70k-90k', fitScore: 87, department: 'Assurance', level: 'Staff / Associate' },
+    { title: 'Intern - Learning & Development', company: 'EY', location: 'Remote', salary: '$25/hr', fitScore: 84, department: 'Internal Functions', level: 'Intern' },
+    { title: 'Senior Consultant - Finance Transformation', company: 'EY', location: 'Chicago, IL', salary: '$100k-125k', fitScore: 95, department: 'Consulting', level: 'Senior Consultant / Senior Associate' },
+    { title: 'Director - General Counsel', company: 'EY', location: 'New York, NY', salary: '$200k-280k', fitScore: 91, department: 'Internal Functions', level: 'Director' },
+    { title: 'Senior Manager - Tax Technology', company: 'EY', location: 'San Jose, CA', salary: '$150k-190k', fitScore: 89, department: 'Tax', level: 'Senior Manager' },
+    { title: 'Associate - Network & Infrastructure', company: 'EY', location: 'Alpharetta, GA', salary: '$70k-90k', fitScore: 86, department: 'Internal Functions', level: 'Staff / Associate' },
+    { title: 'Staff - Brand, Marketing & Communications', company: 'EY', location: 'London, UK', salary: '$55k-75k', fitScore: 83, department: 'Internal Functions', level: 'Staff / Associate' },
+    { title: 'Manager - Turnaround & Restructuring', company: 'EY', location: 'Chicago, IL', salary: '$130k-160k', fitScore: 92, department: 'Strategy', level: 'Manager' },
+    { title: 'Senior Consultant - Global Compliance & Reporting', company: 'EY', location: 'Miami, FL', salary: '$95k-115k', fitScore: 88, department: 'Tax', level: 'Senior Consultant / Senior Associate' }
   ];
+
+  // State for active filters
+  const activeFilters = {
+    departments: new Set(),
+    levels: new Set(),
+    search: '',
+    recommended: false
+  };
 
   content.innerHTML = `
     <h4 class="mb-4">Job Board</h4>
-    <div class="row mb-3">
-      <div class="col">
-        <div class="input-group">
-          <span class="input-group-text"><i class="bi bi-search"></i></span>
-          <input type="text" class="form-control" placeholder="Search jobs...">
-          <button class="btn btn-primary">Search</button>
-        </div>
-      </div>
-    </div>
-    <div class="row g-3">
-      ${jobs.map(job => `
-        <div class="col-12">
-          <div class="card">
-            <div class="card-body d-flex justify-content-between align-items-center">
-              <div>
-                <h5 class="card-title mb-1">${job.title}</h5>
-                <p class="card-text text-muted mb-0">
-                  <i class="bi bi-building me-1"></i>${job.company} · 
-                  <i class="bi bi-geo-alt me-1"></i>${job.location} · 
-                  <i class="bi bi-cash me-1"></i>${job.salary}
-                </p>
-              </div>
-              <div class="d-flex align-items-center gap-3">
-                <div class="text-center">
-                  <div class="fs-4 fw-bold ${job.fitScore >= 90 ? 'text-success' : job.fitScore >= 80 ? 'text-warning' : 'text-secondary'}">${job.fitScore}%</div>
-                  <small class="text-muted">AI Fit Score</small>
-                </div>
-                <button class="btn btn-warning">
-                  <i class="bi bi-bar-chart me-1"></i>View Gap Analysis
-                </button>
-              </div>
+    
+    <!-- Filters -->
+    <div class="card mb-3">
+      <div class="card-body py-3">
+        <div class="row g-3 align-items-center">
+          <div class="col-md-3">
+            <select class="form-select form-select-sm" id="deptFilter">
+              <option value="" selected>Add Department...</option>
+              <option value="Assurance">Assurance</option>
+              <option value="Consulting">Consulting</option>
+              <option value="Strategy">Strategy</option>
+              <option value="Tax">Tax</option>
+              <option value="Internal Functions">Internal Functions</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <select class="form-select form-select-sm" id="levelFilter">
+              <option value="" selected>Add Level...</option>
+              <option value="Intern">Intern</option>
+              <option value="Staff / Associate">Staff / Associate</option>
+              <option value="Senior Consultant / Senior Associate">Senior Consultant / Senior Associate</option>
+              <option value="Manager">Manager</option>
+              <option value="Senior Manager">Senior Manager</option>
+              <option value="Director">Director</option>
+              <option value="Partner / Principal">Partner / Principal</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <input type="text" class="form-control form-control-sm" id="jobSearch" placeholder="Search title, location...">
+          </div>
+          <div class="col-md-3">
+            <div class="form-check form-switch mb-0">
+              <input class="form-check-input" type="checkbox" id="recommendedFilter">
+              <label class="form-check-label small" for="recommendedFilter">Recommended Only (>85% Fit)</label>
             </div>
           </div>
         </div>
-      `).join('')}
+      </div>
     </div>
+
+    <!-- Active Filters Container -->
+    <div id="activeFilters" class="d-flex flex-wrap gap-2 mb-4" style="min-height: 20px;"></div>
+
+    <!-- Results Area -->
+    <div id="jobsContainer" class="row g-3"></div>
   `;
+
+  // Filter and Render Logic
+  const renderList = () => {
+    // 1. Filter the jobs based on active state
+    const filtered = jobs.filter(job => {
+      // OR logic: if no departments selected, match all. If some selected, job must match one of them.
+      const matchDept = activeFilters.departments.size === 0 || activeFilters.departments.has(job.department);
+      
+      // OR logic for levels
+      const matchLevel = activeFilters.levels.size === 0 || activeFilters.levels.has(job.level);
+      
+      // Search logic
+      const searchLower = activeFilters.search.toLowerCase();
+      const matchSearch = !searchLower || 
+                          job.title.toLowerCase().includes(searchLower) || 
+                          job.location.toLowerCase().includes(searchLower) || 
+                          job.company.toLowerCase().includes(searchLower);
+      
+      // Recommended logic
+      const matchRec = !activeFilters.recommended || job.fitScore >= 85;
+
+      return matchDept && matchLevel && matchSearch && matchRec;
+    });
+
+    // 2. Render Active Filter Tags
+    const filtersContainer = document.getElementById('activeFilters');
+    filtersContainer.innerHTML = '';
+
+    const createTag = (text, removeCallback, colorClass = 'bg-secondary') => {
+        const tag = document.createElement('span');
+        tag.className = `badge ${colorClass} d-flex align-items-center p-2`;
+        tag.innerHTML = `
+            <span class="me-2">${text}</span>
+            <i class="bi bi-x-lg" style="cursor: pointer;"></i>
+        `;
+        tag.querySelector('i').addEventListener('click', removeCallback);
+        filtersContainer.appendChild(tag);
+    };
+
+    activeFilters.departments.forEach(dept => {
+        createTag(`Dept: ${dept}`, () => {
+            activeFilters.departments.delete(dept);
+            renderList();
+        });
+    });
+
+    activeFilters.levels.forEach(lvl => {
+        createTag(`Level: ${lvl}`, () => {
+            activeFilters.levels.delete(lvl);
+            renderList();
+        });
+    });
+
+    if (activeFilters.search) {
+        createTag(`Search: "${activeFilters.search}"`, () => {
+            activeFilters.search = '';
+            document.getElementById('jobSearch').value = '';
+            renderList();
+        });
+    }
+
+    if (activeFilters.recommended) {
+        createTag('Recommended Only', () => {
+            activeFilters.recommended = false;
+            document.getElementById('recommendedFilter').checked = false;
+            renderList();
+        }, 'bg-success');
+    }
+
+    // 3. Render Job Cards
+    const container = document.getElementById('jobsContainer');
+    
+    if (filtered.length === 0) {
+      container.innerHTML = `
+        <div class="col-12 text-center py-5">
+          <i class="bi bi-emoji-frown fs-1 text-muted"></i>
+          <p class="text-muted mt-2">No jobs found matching your filters.</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = filtered.map(job => `
+      <div class="col-12">
+        <div class="card">
+          <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+              <div class="d-flex align-items-center mb-1">
+                <h5 class="card-title mb-0 me-2">${job.title}</h5>
+                <span class="badge bg-light text-dark border me-1">${job.department}</span>
+              </div>
+              <p class="card-text text-muted mb-0">
+                <i class="bi bi-building me-1"></i>${job.company} · 
+                <i class="bi bi-geo-alt me-1"></i>${job.location} · 
+                <i class="bi bi-cash me-1"></i>${job.salary}
+              </p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+              <div class="text-center">
+                <div class="fs-4 fw-bold ${job.fitScore >= 90 ? 'text-success' : job.fitScore >= 80 ? 'text-warning' : 'text-secondary'}">${job.fitScore}%</div>
+                <small class="text-muted">AI Fit Score</small>
+              </div>
+              <button class="btn btn-warning">
+                <i class="bi bi-bar-chart me-1"></i>Gap Analysis
+              </button>
+              <button class="btn btn-primary">
+                Apply
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  };
+
+  // Attach Listeners
+  const deptSelect = document.getElementById('deptFilter');
+  deptSelect.addEventListener('change', (e) => {
+    if (e.target.value) {
+        activeFilters.departments.add(e.target.value);
+        e.target.value = ''; // Reset to default
+        renderList();
+    }
+  });
+
+  const levelSelect = document.getElementById('levelFilter');
+  levelSelect.addEventListener('change', (e) => {
+    if (e.target.value) {
+        activeFilters.levels.add(e.target.value);
+        e.target.value = ''; // Reset to default
+        renderList();
+    }
+  });
+
+  document.getElementById('jobSearch').addEventListener('input', (e) => {
+    activeFilters.search = e.target.value;
+    renderList();
+  });
+
+  document.getElementById('recommendedFilter').addEventListener('change', (e) => {
+    activeFilters.recommended = e.target.checked;
+    renderList();
+  });
+
+  // Initial Render
+  renderList();
 }
 
 function renderSeekerLearning() {
@@ -672,11 +964,9 @@ function renderRecruiterHome() {
     <h4 class="mb-4">Recruiter Dashboard</h4>
     
     <!-- Market Landscape Heatmap -->
-    <div class="card mb-4">
-      <div class="card-header">
-        <i class="bi bi-map me-2"></i>Market Landscape Heatmap
-      </div>
+    <div class="card card-uniform mb-4">
       <div class="card-body">
+        <h5 class="card-title">Market Landscape Heatmap</h5>
         <div class="row g-2">
           <div class="col-md-3">
             <div class="p-3 bg-danger text-white rounded text-center" data-bs-toggle="tooltip" title="High demand, low supply: Frontend React">
@@ -729,74 +1019,77 @@ function renderRecruiterHome() {
             </div>
           </div>
         </div>
+        <a href="#" class="explore-link" onclick="navigate('recruiter-strategy'); return false;">Explore</a>
       </div>
     </div>
     
     <div class="row g-4">
       <!-- Candidate Matching Table -->
       <div class="col-md-7">
-        <div class="card">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <span><i class="bi bi-people me-2"></i>Candidate Matching</span>
-            <div class="form-check form-switch mb-0">
-              <input class="form-check-input" type="checkbox" id="blindMode">
-              <label class="form-check-label" for="blindMode">Blind Mode</label>
+        <div class="card card-uniform h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="card-title mb-0">Candidate Matching</h5>
+                <div class="form-check form-switch mb-0">
+                  <input class="form-check-input" type="checkbox" id="blindMode">
+                  <label class="form-check-label text-white" for="blindMode">Blind Mode</label>
+                </div>
             </div>
-          </div>
-          <div class="card-body p-0">
-            <table class="table table-hover mb-0">
-              <thead class="table-light">
-                <tr>
-                  <th>Candidate</th>
-                  <th>Match Score</th>
-                  <th>Skills</th>
-                  <th>Experience</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Sarah Johnson</td>
-                  <td><span class="badge bg-success">96%</span></td>
-                  <td>React, TypeScript, Node.js</td>
-                  <td>5 years</td>
-                  <td><button class="btn btn-sm btn-outline-primary">View</button></td>
-                </tr>
-                <tr>
-                  <td>Michael Chen</td>
-                  <td><span class="badge bg-success">92%</span></td>
-                  <td>Vue, JavaScript, Python</td>
-                  <td>4 years</td>
-                  <td><button class="btn btn-sm btn-outline-primary">View</button></td>
-                </tr>
-                <tr>
-                  <td>Emily Davis</td>
-                  <td><span class="badge bg-warning text-dark">85%</span></td>
-                  <td>React, CSS, GraphQL</td>
-                  <td>3 years</td>
-                  <td><button class="btn btn-sm btn-outline-primary">View</button></td>
-                </tr>
-                <tr>
-                  <td>James Wilson</td>
-                  <td><span class="badge bg-warning text-dark">82%</span></td>
-                  <td>Angular, Java, AWS</td>
-                  <td>6 years</td>
-                  <td><button class="btn btn-sm btn-outline-primary">View</button></td>
-                </tr>
-              </tbody>
-            </table>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 text-white">
+                  <thead>
+                    <tr>
+                      <th class="text-white">Candidate</th>
+                      <th class="text-white">Match Score</th>
+                      <th class="text-white">Skills</th>
+                      <th class="text-white">Experience</th>
+                      <th class="text-white">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Sarah Johnson</td>
+                      <td><span class="badge bg-success">96%</span></td>
+                      <td>React, TypeScript, Node.js</td>
+                      <td>5 years</td>
+                      <td><button class="btn btn-sm btn-outline-primary">View</button></td>
+                    </tr>
+                    <tr>
+                      <td>Michael Chen</td>
+                      <td><span class="badge bg-success">92%</span></td>
+                      <td>Vue, JavaScript, Python</td>
+                      <td>4 years</td>
+                      <td><button class="btn btn-sm btn-outline-primary">View</button></td>
+                    </tr>
+                    <tr>
+                      <td>Emily Davis</td>
+                      <td><span class="badge bg-warning text-dark">85%</span></td>
+                      <td>React, CSS, GraphQL</td>
+                      <td>3 years</td>
+                      <td><button class="btn btn-sm btn-outline-primary">View</button></td>
+                    </tr>
+                    <tr>
+                      <td>James Wilson</td>
+                      <td><span class="badge bg-warning text-dark">82%</span></td>
+                      <td>Angular, Java, AWS</td>
+                      <td>6 years</td>
+                      <td><button class="btn btn-sm btn-outline-primary">View</button></td>
+                    </tr>
+                  </tbody>
+                </table>
+            </div>
+            <a href="#" class="explore-link" onclick="navigate('recruiter-search'); return false;">Explore</a>
           </div>
         </div>
       </div>
       
       <!-- Cost vs Build Calculator -->
       <div class="col-md-5">
-        <div class="card h-100">
-          <div class="card-header">
-            <i class="bi bi-calculator me-2"></i>Cost vs. Build Calculator
-          </div>
+        <div class="card card-uniform h-100">
           <div class="card-body">
+            <h5 class="card-title">Cost vs. Build Calculator</h5>
             <canvas id="costBuildChart"></canvas>
+            <a href="#" class="explore-link" onclick="navigate('recruiter-strategy'); return false;">Explore</a>
           </div>
         </div>
       </div>
@@ -830,8 +1123,17 @@ function renderRecruiterHome() {
       maintainAspectRatio: true,
       scales: {
         y: {
-          beginAtZero: true
+          beginAtZero: true,
+          grid: { color: 'rgba(255,255,255,0.1)' },
+          ticks: { color: '#adb5bd' }
+        },
+        x: {
+          grid: { color: 'rgba(255,255,255,0.1)' },
+          ticks: { color: '#adb5bd' }
         }
+      },
+      plugins: {
+        legend: { labels: { color: '#adb5bd' } }
       }
     }
   });
@@ -1097,61 +1399,58 @@ function renderAuditorHome() {
     <div class="row g-4">
       <!-- Fairness Monitor -->
       <div class="col-md-4">
-        <div class="card h-100">
-          <div class="card-header">
-            <i class="bi bi-balance-scale me-2"></i>Fairness Monitor
-          </div>
+        <div class="card card-uniform h-100">
           <div class="card-body">
-            <div class="alert alert-warning small py-2">
+            <h5 class="card-title">Fairness Monitor</h5>
+            <div class="alert alert-warning small py-2 mb-3">
               <i class="bi bi-exclamation-triangle me-1"></i>
               Gender disparity detected in Senior roles
             </div>
             <canvas id="fairnessChart"></canvas>
+            <a href="#" class="explore-link" onclick="navigate('auditor-reports'); return false;">Explore</a>
           </div>
         </div>
       </div>
       
       <!-- Black Box Decision Log -->
       <div class="col-md-4">
-        <div class="card h-100">
-          <div class="card-header">
-            <i class="bi bi-box me-2"></i>Black Box Decision Log
-          </div>
+        <div class="card card-uniform h-100">
           <div class="card-body">
+            <h5 class="card-title">Black Box Decision Log</h5>
             <div class="input-group input-group-sm mb-3">
               <input type="text" class="form-control" placeholder="Search decisions...">
               <button class="btn btn-outline-secondary"><i class="bi bi-search"></i></button>
             </div>
-            <div class="list-group list-group-flush overflow-auto" style="max-height: 250px;">
-              <div class="list-group-item small">
+            <div class="list-group list-group-flush overflow-auto mb-3" style="max-height: 250px;">
+              <div class="list-group-item small bg-transparent text-white border-secondary">
                 <div class="d-flex justify-content-between">
                   <strong>Candidate #4521</strong>
                   <span class="badge bg-danger">Rejected</span>
                 </div>
                 <small class="text-muted">Score: 45 | Reason: Skill mismatch</small>
               </div>
-              <div class="list-group-item small">
+              <div class="list-group-item small bg-transparent text-white border-secondary">
                 <div class="d-flex justify-content-between">
                   <strong>Candidate #4520</strong>
                   <span class="badge bg-success">Approved</span>
                 </div>
                 <small class="text-muted">Score: 92 | Top match for role</small>
               </div>
-              <div class="list-group-item small">
+              <div class="list-group-item small bg-transparent text-white border-secondary">
                 <div class="d-flex justify-content-between">
                   <strong>Candidate #4519</strong>
                   <span class="badge bg-warning text-dark">Pending</span>
                 </div>
                 <small class="text-muted">Score: 78 | Needs review</small>
               </div>
-              <div class="list-group-item small">
+              <div class="list-group-item small bg-transparent text-white border-secondary">
                 <div class="d-flex justify-content-between">
                   <strong>Candidate #4518</strong>
                   <span class="badge bg-success">Approved</span>
                 </div>
                 <small class="text-muted">Score: 88 | Strong skills match</small>
               </div>
-              <div class="list-group-item small">
+              <div class="list-group-item small bg-transparent text-white border-secondary">
                 <div class="d-flex justify-content-between">
                   <strong>Candidate #4517</strong>
                   <span class="badge bg-danger">Rejected</span>
@@ -1159,44 +1458,44 @@ function renderAuditorHome() {
                 <small class="text-muted">Score: 32 | Experience gap</small>
               </div>
             </div>
+            <a href="#" class="explore-link" onclick="navigate('auditor-logs'); return false;">Explore</a>
           </div>
         </div>
       </div>
       
       <!-- Privacy Shield -->
       <div class="col-md-4">
-        <div class="card h-100">
-          <div class="card-header">
-            <i class="bi bi-shield-lock me-2"></i>Privacy Shield
-          </div>
+        <div class="card card-uniform h-100">
           <div class="card-body">
+            <h5 class="card-title">Privacy Shield</h5>
             <div class="text-center mb-3">
               <div class="position-relative d-inline-block" style="width: 120px; height: 120px;">
                 <svg viewBox="0 0 36 36" class="w-100 h-100">
-                  <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#e9ecef" stroke-width="3"/>
+                  <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#444" stroke-width="3"/>
                   <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#198754" stroke-width="3" stroke-dasharray="85, 100"/>
                 </svg>
                 <div class="position-absolute top-50 start-50 translate-middle">
-                  <strong class="fs-4">85%</strong>
+                  <strong class="fs-4 text-white">85%</strong>
                 </div>
               </div>
               <div class="small text-muted mt-2">Compliance Score</div>
             </div>
             <div class="form-check form-switch mb-2">
               <input class="form-check-input" type="checkbox" id="piiMasking" checked>
-              <label class="form-check-label small" for="piiMasking">PII Auto-Masking</label>
+              <label class="form-check-label small text-white" for="piiMasking">PII Auto-Masking</label>
             </div>
             <div class="form-check form-switch mb-2">
               <input class="form-check-input" type="checkbox" id="dataRetention" checked>
-              <label class="form-check-label small" for="dataRetention">Data Retention Policy</label>
+              <label class="form-check-label small text-white" for="dataRetention">Data Retention Policy</label>
             </div>
             <div class="form-check form-switch mb-3">
               <input class="form-check-input" type="checkbox" id="auditTrail" checked>
-              <label class="form-check-label small" for="auditTrail">Audit Trail Enabled</label>
+              <label class="form-check-label small text-white" for="auditTrail">Audit Trail Enabled</label>
             </div>
-            <button class="btn btn-danger w-100 btn-sm">
+            <button class="btn btn-danger w-100 btn-sm mb-2">
               <i class="bi bi-trash me-1"></i>Purge Expired Data
             </button>
+            <a href="#" class="explore-link" onclick="navigate('auditor-matrix'); return false;">Explore</a>
           </div>
         </div>
       </div>
@@ -1227,13 +1526,23 @@ function renderAuditorHome() {
       plugins: {
         title: {
           display: true,
-          text: 'Hiring by Gender (%)'
+          text: 'Hiring by Gender (%)',
+          color: '#adb5bd'
+        },
+        legend: {
+            labels: { color: '#adb5bd' }
         }
       },
       scales: {
         y: {
           beginAtZero: true,
-          max: 100
+          max: 100,
+          grid: { color: 'rgba(255,255,255,0.1)' },
+          ticks: { color: '#adb5bd' }
+        },
+        x: {
+            grid: { color: 'rgba(255,255,255,0.1)' },
+            ticks: { color: '#adb5bd' }
         }
       }
     }
@@ -1548,6 +1857,7 @@ function renderComplianceReports() {
 // ============================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
   renderShell('seeker');
   navigate('seeker-home');
 });
