@@ -146,9 +146,9 @@ function renderShell(role) {
   header.style.height = '60px';
 
   header.innerHTML = `
-    <button class="btn btn-outline-primary me-3">
-      <i class="bi bi-robot me-1"></i>AI Career Agent
-    </button>
+    <a href="#" class="nav-link me-3 text-dark">
+      <span class="nav-item-label">AI Career Agent</span>
+    </a>
     <i class="bi bi-bell fs-5 me-3" style="cursor: pointer;"></i>
     <div class="dropdown">
       <a class="d-flex align-items-center text-decoration-none dropdown-toggle text-dark" href="#" data-bs-toggle="dropdown" data-bs-display="static">
