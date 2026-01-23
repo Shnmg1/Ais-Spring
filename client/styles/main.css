@@ -501,6 +501,118 @@ body {
 }
 
 /* ==========================================================================
+   Public Profile Modal
+   ========================================================================== */
+.public-profile-modal .modal-content {
+  background-color: var(--app-surface);
+  color: var(--app-text);
+  border: 1px solid var(--app-border);
+  border-radius: 0;
+}
+
+.public-profile-modal .modal-header {
+  background-color: rgba(127, 127, 127, 0.05);
+  border-bottom-color: var(--app-border);
+}
+
+.public-profile-modal .btn-close {
+  filter: invert(1);
+}
+
+.profile-cover {
+  height: 140px;
+  background: linear-gradient(120deg, rgba(var(--app-primary-rgb), 0.25), rgba(0, 0, 0, 0.7));
+  border-bottom: 1px solid var(--app-border);
+}
+
+.profile-hero {
+  margin-top: -48px;
+}
+
+.profile-avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.5rem;
+  border: 3px solid var(--app-bg);
+}
+
+.profile-avatar-sm {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.profile-info-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: var(--glass-backdrop);
+  -webkit-backdrop-filter: var(--glass-backdrop);
+  padding: 0.5rem 0.75rem;
+  display: inline-block;
+}
+
+.skill-ring {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  border: 6px solid rgba(var(--app-primary-rgb), 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.skill-ring::after {
+  content: "";
+  position: absolute;
+  inset: 14px;
+  border-radius: 50%;
+  border: 4px solid rgba(var(--app-primary-rgb), 0.15);
+}
+
+.skill-ring-inner {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 4px solid rgba(var(--app-primary-rgb), 0.7);
+}
+
+.competency-bar {
+  width: 120px;
+  height: 6px;
+  background-color: var(--app-surface-hover);
+}
+
+.absence-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+}
+
+[data-theme="light"] .public-profile-modal .btn-close {
+  filter: none;
+}
+
+[data-theme="light"] .profile-avatar {
+  border-color: #ffffff;
+}
+
+/* ==========================================================================
    Navigation Pills Updates (Yellow Underline)
    ========================================================================== */
 

@@ -4,8 +4,8 @@
   "description": "TalentFlow API Server",
   "main": "index.js",
   "scripts": {
-    "start": "bun run index.js",
-    "dev": "bun --watch index.js",
+    "start": "bun run bun_server.js",
+    "dev": "bun --watch bun_server.js",
     "start:node": "node index.js"
   },
   "dependencies": {
