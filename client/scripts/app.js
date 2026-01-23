@@ -210,7 +210,7 @@ function renderShell(role) {
         <span>Alex Chen</span>
       </a>
       <ul class="dropdown-menu dropdown-menu-end animate-slide">
-        <li><a class="dropdown-item" href="#">Profile</a></li>
+        <li><a class="dropdown-item" href="#" onclick="showPublicProfileModal(); return false;">Public Profile</a></li>
         <li><a class="dropdown-item" href="#" onclick="navigate('settings'); return false;">Settings</a></li>
         <li><hr class="dropdown-divider"></li>
         <li><a class="dropdown-item" href="#">Logout</a></li>
@@ -727,7 +727,43 @@ const mockCareerData = {
     { id: 1, title: 'Manager - Technology Consulting', department: 'Consulting', location: 'Dallas, TX', fitScore: 96, salary: '$140k-180k', reason: 'Natural progression based on performance and leadership skills' },
     { id: 2, title: 'Senior Manager - AI & Data', department: 'Technology', location: 'Austin, TX', fitScore: 89, salary: '$160k-200k', reason: 'Strong ML skills and recent AI project experience' },
     { id: 3, title: 'Director - Cloud Architecture', department: 'Technology', location: 'Remote', fitScore: 85, salary: '$180k-220k', reason: 'AWS expertise and cloud migration leadership' }
-  ]
+  ],
+  publicProfile: {
+    spotlightLabel: 'Spotlight',
+    status: { label: 'Out of Office', backOn: 'Jan 28, 2026' },
+    bio: 'I enjoy meeting new people and finding ways to help them have an uplifting experience. I am passionate, love arts and enjoy spending time with ...',
+    contact: {
+      phone: '(1) 416 6172297',
+      email: 'alex.chen@ey.com',
+      location: 'Dallas, TX'
+    },
+    manager: { name: 'Jerry Choate', title: 'Head of R&D' },
+    org: {
+      company: 'BestRun (10000)',
+      businessUnit: 'Products (PRODS)',
+      division: 'Research & Development (RES_DEV)',
+      department: 'Technology Consulting'
+    },
+    absence: { range: 'January 25 – 27', label: 'Out of Office' },
+    skillHighlights: {
+      left: { label: 'Problem Solving', score: 4 },
+      right: { label: 'Business Processes', score: 4 }
+    },
+    competencies: [
+      { label: 'Attentive Listening', value: 5 },
+      { label: 'Inspiring and Motivating Others', value: 4 },
+      { label: 'Building and Supporting Teams', value: 4 },
+      { label: 'Critical Thinking', value: 3 },
+      { label: 'Displaying Technical Expertise', value: 3 }
+    ],
+    reportingLine: [
+      { name: 'Linda R. Simpson', title: 'CEO' },
+      { name: 'Janelle Boring', title: 'VP Products' },
+      { name: 'Jerry Choate', title: 'Head of R&D' }
+    ],
+    targetRoles: ['CHRO', 'Director of Marketing', 'VP Marketing'],
+    tags: ['Leadership', 'People Ops', 'Coaching', 'Culture']
+  }
 };
 
 async function fetchCareerData() {
@@ -818,6 +854,7 @@ async function fetchCareerData() {
       feedback: feedback.length > 0 ? feedback : mockCareerData.feedback,
       skills: skills.length > 0 ? skills : mockCareerData.skills,
       recommendations: recommendations.length > 0 ? recommendations : mockCareerData.recommendations,
+      publicProfile: (employee && employee.publicProfile) ? employee.publicProfile : mockCareerData.publicProfile,
       availableTables: tablesRes,
       fromDatabase: true
     };
@@ -1197,7 +1234,367 @@ window.showDatabaseInfo = function() {
   modal.show();
 };
 
+<<<<<<< HEAD
 async function renderSeekerJobs() {
+=======
+function escapeHtml(value) {
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function getInitials(name) {
+  if (!name) return '';
+  return String(name)
+    .trim()
+    .split(/\s+/)
+    .map(part => part[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+}
+
+function clampRating(value) {
+  const num = Number(value);
+  if (Number.isNaN(num)) return 0;
+  return Math.max(1, Math.min(5, Math.round(num)));
+}
+
+function buildPublicProfileData(data) {
+  const fallback = (data && data.publicProfile) ? data.publicProfile : (mockCareerData.publicProfile || {});
+  const employee = (data && data.employee) ? data.employee : {};
+  const skills = Array.isArray(data && data.skills) ? data.skills : [];
+  const recommendations = Array.isArray(data && data.recommendations) ? data.recommendations : [];
+
+  const name = employee.name || fallback.name || 'Employee';
+  const title = employee.title || fallback.title || '';
+  const department = employee.department || (fallback.org && fallback.org.department) || '';
+  const location = employee.location || (fallback.contact && fallback.contact.location) || '';
+
+  const contact = {
+    phone: employee.phone || (fallback.contact && fallback.contact.phone) || '',
+    email: employee.email || (fallback.contact && fallback.contact.email) || '',
+    location
+  };
+
+  const org = {
+    company: (fallback.org && fallback.org.company) || '',
+    businessUnit: (fallback.org && fallback.org.businessUnit) || '',
+    division: (fallback.org && fallback.org.division) || '',
+    department
+  };
+
+  const skillHighlights = (() => {
+    const sorted = skills.slice().sort((a, b) => (b.level || 0) - (a.level || 0));
+    const first = sorted[0];
+    const second = sorted[1];
+    if (first && second) {
+      return {
+        left: { label: first.name, score: clampRating((first.level || 0) / 20) },
+        right: { label: second.name, score: clampRating((second.level || 0) / 20) }
+      };
+    }
+    return fallback.skillHighlights || {
+      left: { label: 'Problem Solving', score: 4 },
+      right: { label: 'Business Processes', score: 4 }
+    };
+  })();
+
+  const targetRoles = recommendations.length
+    ? recommendations.map(r => r.title).slice(0, 3)
+    : (fallback.targetRoles || []);
+
+  const tags = (() => {
+    const tagCandidates = skills.filter(s => s.verified).map(s => s.name);
+    const unique = Array.from(new Set(tagCandidates));
+    return unique.length ? unique.slice(0, 4) : (fallback.tags || []);
+  })();
+
+  return {
+    spotlightLabel: fallback.spotlightLabel || 'Spotlight',
+    status: fallback.status || { label: 'Available', backOn: '' },
+    name,
+    title,
+    department,
+    location,
+    contact,
+    bio: fallback.bio || '',
+    manager: fallback.manager || { name: '', title: '' },
+    org,
+    absence: fallback.absence || { range: '', label: '' },
+    skillHighlights,
+    competencies: fallback.competencies || [],
+    reportingLine: fallback.reportingLine || [],
+    targetRoles,
+    tags,
+    timeLabel: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+  };
+}
+
+// Public profile modal (matches site theme + styles)
+window.showPublicProfileModal = async function() {
+  const data = await fetchCareerData();
+  const profile = buildPublicProfileData(data);
+  const statusText = profile.status.backOn
+    ? `${profile.status.label} · Back on ${profile.status.backOn}`
+    : profile.status.label;
+
+  const contactRows = [
+    profile.contact.phone ? `
+      <div class="d-flex align-items-center mb-3">
+        <i class="bi bi-telephone me-2 text-warning"></i>
+        <span>${escapeHtml(profile.contact.phone)}</span>
+      </div>
+    ` : '',
+    profile.contact.email ? `
+      <div class="d-flex align-items-center mb-3">
+        <i class="bi bi-envelope me-2 text-warning"></i>
+        <span>${escapeHtml(profile.contact.email)}</span>
+      </div>
+    ` : '',
+    profile.contact.location ? `
+      <div class="d-flex align-items-center">
+        <i class="bi bi-geo-alt me-2 text-warning"></i>
+        <span>${escapeHtml(profile.contact.location)}</span>
+      </div>
+    ` : ''
+  ].filter(Boolean).join('');
+
+  const orgRows = [
+    profile.org.company ? `<div>Company: ${escapeHtml(profile.org.company)}</div>` : '',
+    profile.org.businessUnit ? `<div>Business Unit: ${escapeHtml(profile.org.businessUnit)}</div>` : '',
+    profile.org.division ? `<div>Division: ${escapeHtml(profile.org.division)}</div>` : '',
+    profile.org.department ? `<div>Department: ${escapeHtml(profile.org.department)}</div>` : ''
+  ].filter(Boolean).join('');
+
+  const modalHtml = `
+    <div class="modal fade public-profile-modal" id="publicProfileModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header border-bottom">
+            <div class="d-flex align-items-center gap-2">
+              <span class="badge bg-primary text-dark">${escapeHtml(profile.spotlightLabel)}</span>
+              <h5 class="modal-title mb-0">Public Profile</h5>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <button class="btn btn-outline-primary btn-sm">Full Profile</button>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+          </div>
+          <div class="modal-body p-0">
+            <div class="profile-cover"></div>
+            <div class="p-4 pt-0">
+              <div class="d-flex align-items-end gap-3 profile-hero">
+                <div class="profile-avatar bg-primary text-dark">${escapeHtml(getInitials(profile.name))}</div>
+                <div class="flex-grow-1">
+                  <div class="d-flex flex-wrap align-items-center gap-2">
+                    <h4 class="mb-0">${escapeHtml(profile.name)}</h4>
+                    <button class="btn btn-sm btn-outline-primary px-2 py-0">
+                      <i class="bi bi-pencil"></i>
+                    </button>
+                  </div>
+                  <div class="profile-info-card mt-2">
+                    <div class="small text-muted">
+                      ${escapeHtml(profile.title)}${profile.department ? ` · ${escapeHtml(profile.department)}` : ''}
+                    </div>
+                    <div class="d-flex flex-wrap gap-3 small text-muted mt-1">
+                      ${statusText ? `<span><i class="bi bi-clock me-1"></i>${escapeHtml(statusText)}</span>` : ''}
+                      ${profile.location ? `<span><i class="bi bi-geo-alt me-1"></i>${escapeHtml(profile.location)}</span>` : ''}
+                    </div>
+                  </div>
+                </div>
+                <div class="text-muted small d-none d-md-block">
+                  <i class="bi bi-clock me-1"></i>${escapeHtml(profile.timeLabel)} (Local Time)
+                </div>
+              </div>
+
+              <div class="row g-4 mt-3">
+                <!-- Left Sidebar -->
+                <div class="col-lg-4">
+                  <div class="card mb-4">
+                    <div class="card-header">
+                      <i class="bi bi-person-lines-fill me-2"></i>Contact
+                    </div>
+                    <div class="card-body">
+                      ${contactRows || '<span class="text-muted small">No contact details available.</span>'}
+                    </div>
+                  </div>
+
+                  <div class="card mb-4">
+                    <div class="card-header">
+                      <i class="bi bi-chat-left-text me-2"></i>Bio
+                    </div>
+                    <div class="card-body">
+                      <p class="text-muted mb-0">
+                        ${escapeHtml(profile.bio)}
+                        <a href="#" class="text-warning text-decoration-none">Show More</a>
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                      <span><i class="bi bi-people me-2"></i>Direct Manager</span>
+                      <i class="bi bi-diagram-3 text-warning"></i>
+                    </div>
+                    <div class="card-body d-flex align-items-center gap-3">
+                      <div class="profile-avatar-sm bg-primary text-dark">${escapeHtml(getInitials(profile.manager.name))}</div>
+                      <div>
+                        <div class="fw-semibold">${escapeHtml(profile.manager.name)}</div>
+                        <div class="text-muted small">${escapeHtml(profile.manager.title)}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="col-lg-8">
+                  <div class="row g-4">
+                    <div class="col-md-6">
+                      <div class="card h-100">
+                        <div class="card-header">
+                          <i class="bi bi-bullseye me-2"></i>Skills
+                        </div>
+                        <div class="card-body d-flex align-items-center justify-content-center">
+                          <div class="text-center">
+                            <div class="text-muted small mb-2">
+                              ${escapeHtml(profile.skillHighlights.left.label)} (${profile.skillHighlights.left.score}/5)
+                            </div>
+                            <div class="skill-ring">
+                              <div class="skill-ring-inner"></div>
+                            </div>
+                            <div class="text-muted small mt-2">
+                              ${escapeHtml(profile.skillHighlights.right.label)} (${profile.skillHighlights.right.score}/5)
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-6">
+                      <div class="card h-100">
+                        <div class="card-header">
+                          <i class="bi bi-graph-up me-2"></i>Competencies
+                        </div>
+                        <div class="card-body">
+                          ${profile.competencies.map(item => `
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                              <span class="small">${escapeHtml(item.label)}</span>
+                              <div class="d-flex align-items-center gap-2">
+                                <span class="small text-muted">${item.value}</span>
+                                <div class="progress competency-bar">
+                                  <div class="progress-bar bg-primary" style="width: ${item.value * 20}%;"></div>
+                                </div>
+                              </div>
+                            </div>
+                          `).join('')}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-6">
+                      <div class="card h-100">
+                        <div class="card-header">
+                          <i class="bi bi-building me-2"></i>Organization Information
+                        </div>
+                        <div class="card-body small text-muted">
+                          ${orgRows || '<div>No organization details available.</div>'}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-6">
+                      <div class="card h-100">
+                        <div class="card-header">
+                          <i class="bi bi-calendar2-week me-2"></i>Upcoming Absence
+                        </div>
+                        <div class="card-body d-flex align-items-center justify-content-between">
+                          <div>
+                            <div class="fw-semibold">${escapeHtml(profile.absence.range)}</div>
+                            <div class="text-muted small">${escapeHtml(profile.absence.label)}</div>
+                          </div>
+                          <div class="absence-icon bg-primary bg-opacity-25 text-warning">
+                            <i class="bi bi-door-open"></i>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-12">
+                      <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                          <span><i class="bi bi-diagram-2 me-2"></i>Reporting Line</span>
+                          <i class="bi bi-diagram-3 text-warning"></i>
+                        </div>
+                        <div class="card-body">
+                          <div class="row g-3">
+                            ${profile.reportingLine.map(entry => `
+                              <div class="col-md-4 d-flex align-items-center gap-2">
+                                <div class="profile-avatar-sm bg-primary text-dark">${escapeHtml(getInitials(entry.name))}</div>
+                                <div>
+                                  <div class="fw-semibold small">${escapeHtml(entry.name)}</div>
+                                  <div class="text-muted small">${escapeHtml(entry.title)}</div>
+                                </div>
+                              </div>
+                            `).join('')}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-6">
+                      <div class="card h-100">
+                        <div class="card-header">
+                          <i class="bi bi-briefcase me-2"></i>Target Roles
+                        </div>
+                        <div class="card-body">
+                          <div class="d-flex flex-wrap gap-2">
+                            ${profile.targetRoles.map(role => `
+                              <span class="badge bg-primary text-dark">${escapeHtml(role)}</span>
+                            `).join('')}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-6">
+                      <div class="card h-100">
+                        <div class="card-header">
+                          <i class="bi bi-tags me-2"></i>Tags
+                        </div>
+                        <div class="card-body">
+                          <div class="d-flex flex-wrap gap-2">
+                            ${profile.tags.map(tag => `
+                              <span class="badge bg-secondary">${escapeHtml(tag)}</span>
+                            `).join('')}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const existing = document.getElementById('publicProfileModal');
+  if (existing) existing.remove();
+
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+  const modal = new bootstrap.Modal(document.getElementById('publicProfileModal'));
+  modal.show();
+};
+
+function renderSeekerJobs() {
+>>>>>>> 1312631a221e887edf7a7fb4f1eb62df3fc3ace4
   const content = document.getElementById('content-area');
   
   // Show loading state
