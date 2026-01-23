@@ -15,6 +15,7 @@ let currentRole = 'seeker';
 const navData = {
   seeker: [
     { name: 'Home', icon: 'bi-house-door', id: 'seeker-home' },
+    { name: 'People Profile', icon: 'bi-person-vcard', id: 'seeker-people-profile' },
     { name: 'My Career', icon: 'bi-person-badge', id: 'seeker-profile' },
     { name: 'Career History', icon: 'bi-clock-history', id: 'seeker-career' },
     { name: 'Learning Paths', icon: 'bi-book', id: 'seeker-learning' },
@@ -278,6 +279,7 @@ function navigate(routeId) {
   const routes = {
     // Job Seeker
     'seeker-home': renderSeekerHome,
+    'seeker-people-profile': renderPeopleProfile,
     'seeker-profile': renderSeekerProfile,
     'seeker-career': renderCareer,
     'seeker-learning': renderSeekerLearning,
@@ -372,6 +374,1110 @@ function renderSettings() {
 // ============================================================================
 // JOB SEEKER VIEWS
 // ============================================================================
+
+// ============================================================================
+// PEOPLE PROFILE - Premium Editorial Design
+// ============================================================================
+
+function renderPeopleProfile() {
+  const content = document.getElementById('content-area');
+
+  // Employee data (would come from database in production)
+  const employee = {
+    firstName: 'Molly',
+    lastName: 'Huddleston',
+    title: 'Marketing Manager',
+    department: 'Market Research',
+    employeeId: '5000131',
+    directReports: 6,
+    status: 'Out of Office',
+    returnDate: 'Jan 28, 2026',
+    personal: {
+      salutation: 'Mrs.',
+      gender: '••••••',
+      globalInfo: 'United States (USA)',
+      dateOfBirth: 'Sep 15, 1980',
+      countryOfBirth: 'United States (USA)',
+      personId: 'M1'
+    },
+    address: {
+      type: 'Home',
+      line1: '2335 Carriage Court',
+      city: 'San Diego',
+      state: 'California (CA)',
+      country: 'United States (USA)'
+    },
+    contacts: [
+      { type: 'Business', label: 'B', icon: 'bi-telephone', value: '+1 416 6172297', primary: true },
+      { type: 'Home', label: 'H', icon: 'bi-telephone', value: '+1 455 4455566', primary: false },
+      { type: 'Business', label: 'B', icon: 'bi-envelope', value: 'molly.huddleston@bestrunsap.com', primary: true }
+    ],
+    nationalId: {
+      country: 'United States (USA)',
+      cardType: 'Social Security Number',
+      number: '••••••',
+      isPrimary: true
+    },
+    emergency: {
+      name: 'John Mayer',
+      relationship: 'Other (relation_Other)',
+      phone: '619-972-4317',
+      isPrimary: true
+    },
+    dependents: [
+      { firstName: 'Sky', lastName: 'Mayer', relationship: 'Child (2)', dob: 'Mar 2, 2010' }
+    ],
+    payment: {
+      mainMethod: 'Cash (09)',
+      accountNumber: '134934380',
+      payroll: [
+        { method: 'Bank Transfer (05)', amount: null },
+        { method: 'Cash (09)', amount: null }
+      ]
+    }
+  };
+
+  const navItems = [
+    { id: 'personal', icon: 'bi-person', label: 'Personal Data', active: true },
+    { id: 'time', icon: 'bi-clock', label: 'Time Management' },
+    { id: 'performance', icon: 'bi-graph-up-arrow', label: 'Performance and Goals' },
+    { id: 'career', icon: 'bi-clock-history', label: 'Career History' },
+    { id: 'succession', icon: 'bi-diagram-3', label: 'Succession' },
+    { id: 'learning', icon: 'bi-mortarboard', label: 'Learning and Development' },
+    { id: 'talent', icon: 'bi-star', label: 'Talent Profile' }
+  ];
+
+  // Section content generators
+  const sectionContent = {
+    personal: () => `
+      <h1 class="pp-section-title">Personal Data</h1>
+
+      <!-- First Row - 2x2 Grid -->
+      <div class="pp-cards-grid" style="margin-bottom: 1rem;">
+
+        <!-- Personal Information -->
+        <div class="pp-card">
+          <div class="pp-card-header">
+            <span class="pp-card-title">Personal Information</span>
+            <div class="pp-card-actions">
+              <button class="pp-card-action warning"><i class="bi bi-exclamation-triangle"></i></button>
+              <button class="pp-card-action"><i class="bi bi-pencil"></i></button>
+              <button class="pp-card-action"><i class="bi bi-arrow-counterclockwise"></i></button>
+            </div>
+          </div>
+          <div class="pp-card-body">
+            <div class="pp-data-row">
+              <span class="pp-data-label">First Name</span>
+              <span class="pp-data-value">${employee.firstName}</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Last Name</span>
+              <span class="pp-data-value">${employee.lastName}</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Salutation</span>
+              <span class="pp-data-value">${employee.personal.salutation}</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Gender</span>
+              <span class="pp-data-value masked">${employee.personal.gender}<span class="pp-show-link">Show</span></span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Global Information</span>
+              <span class="pp-data-value">${employee.personal.globalInfo}</span>
+            </div>
+          </div>
+          <div class="pp-view-all">View All →</div>
+        </div>
+
+        <!-- Biographical Information -->
+        <div class="pp-card">
+          <div class="pp-card-header">
+            <span class="pp-card-title">Biographical Information</span>
+            <div class="pp-card-actions">
+              <button class="pp-card-action"><i class="bi bi-pencil"></i></button>
+            </div>
+          </div>
+          <div class="pp-card-body">
+            <div class="pp-data-row">
+              <span class="pp-data-label">Person ID</span>
+              <span class="pp-data-value">${employee.personal.personId}</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Date of Birth</span>
+              <span class="pp-data-value">${employee.personal.dateOfBirth}</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Country of Birth</span>
+              <span class="pp-data-value">${employee.personal.countryOfBirth}</span>
+            </div>
+          </div>
+          <div class="pp-view-all">View All →</div>
+        </div>
+
+        <!-- Addresses -->
+        <div class="pp-card">
+          <div class="pp-card-header">
+            <span class="pp-card-title">Addresses</span>
+            <div class="pp-card-actions">
+              <button class="pp-card-action warning"><i class="bi bi-exclamation-triangle"></i></button>
+              <button class="pp-card-action"><i class="bi bi-pencil"></i></button>
+              <button class="pp-card-action"><i class="bi bi-arrow-counterclockwise"></i></button>
+            </div>
+          </div>
+          <div class="pp-card-body">
+            <div class="pp-data-row">
+              <span class="pp-data-label">Address Type</span>
+              <span class="pp-data-value">${employee.address.type} (home)</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Country</span>
+              <span class="pp-data-value">${employee.address.country}</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Address Line 1</span>
+              <span class="pp-data-value">${employee.address.line1}</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">City</span>
+              <span class="pp-data-value">${employee.address.city}</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">State</span>
+              <span class="pp-data-value">${employee.address.state}</span>
+            </div>
+          </div>
+          <div class="pp-view-all">View All →</div>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="pp-card">
+          <div class="pp-card-header">
+            <span class="pp-card-title">Contact Information</span>
+            <div class="pp-card-actions">
+              <button class="pp-card-action"><i class="bi bi-pencil"></i></button>
+            </div>
+          </div>
+          <div class="pp-card-body">
+            ${employee.contacts.map(c => `
+              <div class="pp-contact-item">
+                <div class="pp-contact-icon">
+                  <i class="bi ${c.icon}"></i>
+                </div>
+                <div class="pp-contact-details">
+                  <div class="pp-contact-type">
+                    ${c.type} (${c.label})
+                    ${c.primary ? '<i class="bi bi-star-fill primary"></i>' : ''}
+                  </div>
+                  <div class="pp-contact-value">${c.value}</div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+          <div class="pp-view-all">View All →</div>
+        </div>
+
+      </div>
+
+      <!-- Second Row - 4 columns -->
+      <div class="pp-cards-grid" style="grid-template-columns: repeat(4, 1fr);">
+
+        <!-- National ID -->
+        <div class="pp-card">
+          <div class="pp-card-header">
+            <span class="pp-card-title">National ID Information</span>
+            <div class="pp-card-actions">
+              <button class="pp-card-action warning"><i class="bi bi-exclamation-triangle"></i></button>
+              <button class="pp-card-action"><i class="bi bi-pencil"></i></button>
+            </div>
+          </div>
+          <div class="pp-card-body">
+            <div class="pp-data-row">
+              <span class="pp-data-label">Country</span>
+              <span class="pp-data-value">${employee.nationalId.country}</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Card Type</span>
+              <span class="pp-data-value">${employee.nationalId.cardType}</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">National ID</span>
+              <span class="pp-data-value masked">${employee.nationalId.number}<span class="pp-show-link">Show</span></span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Is Primary</span>
+              <span class="pp-data-value">${employee.nationalId.isPrimary ? 'Yes' : 'No'}</span>
+            </div>
+          </div>
+          <div class="pp-view-all">View All →</div>
+        </div>
+
+        <!-- Emergency Contact -->
+        <div class="pp-card">
+          <div class="pp-card-header">
+            <span class="pp-card-title">Primary Emergency Contact</span>
+            <div class="pp-card-actions">
+              <button class="pp-card-action"><i class="bi bi-pencil"></i></button>
+            </div>
+          </div>
+          <div class="pp-card-body">
+            <div class="pp-data-row">
+              <span class="pp-data-label">Name</span>
+              <span class="pp-data-value">${employee.emergency.name}</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Relationship</span>
+              <span class="pp-data-value">${employee.emergency.relationship}</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Phone</span>
+              <span class="pp-data-value highlight">${employee.emergency.phone}</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Is Primary</span>
+              <span class="pp-data-value">${employee.emergency.isPrimary ? 'Yes' : 'No'}</span>
+            </div>
+          </div>
+          <div class="pp-view-all">View All →</div>
+        </div>
+
+        <!-- Dependents -->
+        <div class="pp-card">
+          <div class="pp-card-header">
+            <span class="pp-card-title">Dependents</span>
+            <div class="pp-card-actions">
+              <button class="pp-card-action"><i class="bi bi-pencil"></i></button>
+            </div>
+          </div>
+          <div class="pp-card-body">
+            ${employee.dependents.map(d => `
+              <div class="pp-data-row">
+                <span class="pp-data-label">First Name</span>
+                <span class="pp-data-value">${d.firstName}</span>
+              </div>
+              <div class="pp-data-row">
+                <span class="pp-data-label">Last Name</span>
+                <span class="pp-data-value">${d.lastName}</span>
+              </div>
+              <div class="pp-data-row">
+                <span class="pp-data-label">Relationship</span>
+                <span class="pp-data-value">${d.relationship}</span>
+              </div>
+              <div class="pp-data-row">
+                <span class="pp-data-label">Date of Birth</span>
+                <span class="pp-data-value">${d.dob}</span>
+              </div>
+            `).join('')}
+          </div>
+          <div class="pp-view-all">View All →</div>
+        </div>
+
+        <!-- Payment Information -->
+        <div class="pp-card">
+          <div class="pp-card-header">
+            <span class="pp-card-title">Payment Information</span>
+            <div class="pp-card-actions">
+              <button class="pp-card-action"><i class="bi bi-pencil"></i></button>
+              <button class="pp-card-action"><i class="bi bi-arrow-counterclockwise"></i></button>
+            </div>
+          </div>
+          <div class="pp-card-body">
+            <div class="pp-data-row">
+              <span class="pp-data-label">Main Payment Method</span>
+              <span class="pp-data-value">${employee.payment.mainMethod}</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Account</span>
+              <span class="pp-data-value">${employee.payment.accountNumber}</span>
+            </div>
+            ${employee.payment.payroll.map(p => `
+              <div class="pp-data-row">
+                <span class="pp-data-label">Payroll</span>
+                <span class="pp-data-value">${p.method}</span>
+              </div>
+            `).join('')}
+          </div>
+          <div class="pp-view-all">View All →</div>
+        </div>
+
+      </div>
+    `,
+
+    time: () => `
+      <h1 class="pp-section-title">Time Management</h1>
+
+      <div class="pp-cards-grid">
+        <!-- Time Off Balance -->
+        <div class="pp-card">
+          <div class="pp-card-header">
+            <span class="pp-card-title">Time Off Balance</span>
+            <div class="pp-card-actions">
+              <button class="pp-card-action"><i class="bi bi-plus-lg"></i></button>
+            </div>
+          </div>
+          <div class="pp-card-body">
+            <div class="pp-data-row">
+              <span class="pp-data-label">Vacation Days</span>
+              <span class="pp-data-value highlight">12 days</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Sick Leave</span>
+              <span class="pp-data-value">8 days</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Personal Days</span>
+              <span class="pp-data-value">3 days</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Floating Holidays</span>
+              <span class="pp-data-value">2 days</span>
+            </div>
+          </div>
+          <div class="pp-view-all">Request Time Off →</div>
+        </div>
+
+        <!-- Upcoming Time Off -->
+        <div class="pp-card">
+          <div class="pp-card-header">
+            <span class="pp-card-title">Upcoming Time Off</span>
+          </div>
+          <div class="pp-card-body">
+            <div class="pp-data-row">
+              <span class="pp-data-label">Jan 24 - Jan 28</span>
+              <span class="pp-data-value">Vacation (5 days)</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Feb 14</span>
+              <span class="pp-data-value">Personal Day</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Mar 10 - Mar 12</span>
+              <span class="pp-data-value">Conference</span>
+            </div>
+          </div>
+          <div class="pp-view-all">View Calendar →</div>
+        </div>
+
+        <!-- Work Schedule -->
+        <div class="pp-card">
+          <div class="pp-card-header">
+            <span class="pp-card-title">Work Schedule</span>
+            <div class="pp-card-actions">
+              <button class="pp-card-action"><i class="bi bi-pencil"></i></button>
+            </div>
+          </div>
+          <div class="pp-card-body">
+            <div class="pp-data-row">
+              <span class="pp-data-label">Schedule Type</span>
+              <span class="pp-data-value">Hybrid</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Office Days</span>
+              <span class="pp-data-value">Tue, Wed, Thu</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Work Hours</span>
+              <span class="pp-data-value">9:00 AM - 5:30 PM</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Timezone</span>
+              <span class="pp-data-value">PST (UTC-8)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Time Sheet Summary -->
+        <div class="pp-card">
+          <div class="pp-card-header">
+            <span class="pp-card-title">Time Sheet Summary</span>
+          </div>
+          <div class="pp-card-body">
+            <div class="pp-data-row">
+              <span class="pp-data-label">This Week</span>
+              <span class="pp-data-value highlight">32 / 40 hrs</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Last Week</span>
+              <span class="pp-data-value">42 hrs</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">MTD Average</span>
+              <span class="pp-data-value">41 hrs</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Status</span>
+              <span class="pp-data-value" style="color: #22c55e;">Approved</span>
+            </div>
+          </div>
+          <div class="pp-view-all">Submit Timesheet →</div>
+        </div>
+      </div>
+    `,
+
+    performance: () => `
+      <h1 class="pp-section-title">Performance and Goals</h1>
+
+      <div class="pp-cards-grid">
+        <!-- Current Goals -->
+        <div class="pp-card">
+          <div class="pp-card-header">
+            <span class="pp-card-title">Current Goals (Q1 2026)</span>
+            <div class="pp-card-actions">
+              <button class="pp-card-action"><i class="bi bi-plus-lg"></i></button>
+            </div>
+          </div>
+          <div class="pp-card-body">
+            <div class="pp-data-row">
+              <span class="pp-data-label">Lead Product Launch</span>
+              <span class="pp-data-value highlight">75% Complete</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Team Training Program</span>
+              <span class="pp-data-value">50% Complete</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Client Retention Target</span>
+              <span class="pp-data-value" style="color: #22c55e;">Achieved</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Process Optimization</span>
+              <span class="pp-data-value">25% Complete</span>
+            </div>
+          </div>
+          <div class="pp-view-all">Manage Goals →</div>
+        </div>
+
+        <!-- Performance Rating -->
+        <div class="pp-card">
+          <div class="pp-card-header">
+            <span class="pp-card-title">Performance Ratings</span>
+          </div>
+          <div class="pp-card-body">
+            <div class="pp-data-row">
+              <span class="pp-data-label">2025 Annual Review</span>
+              <span class="pp-data-value highlight">Exceeds Expectations</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">2024 Annual Review</span>
+              <span class="pp-data-value">Meets Expectations</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">2023 Annual Review</span>
+              <span class="pp-data-value">Exceeds Expectations</span>
+            </div>
+          </div>
+          <div class="pp-view-all">View History →</div>
+        </div>
+
+        <!-- Feedback -->
+        <div class="pp-card">
+          <div class="pp-card-header">
+            <span class="pp-card-title">Recent Feedback</span>
+          </div>
+          <div class="pp-card-body">
+            <div class="pp-data-row">
+              <span class="pp-data-label">Jan 15, 2026</span>
+              <span class="pp-data-value">Manager Check-in</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Dec 20, 2025</span>
+              <span class="pp-data-value">Peer Review</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Nov 30, 2025</span>
+              <span class="pp-data-value">Project Feedback</span>
+            </div>
+          </div>
+          <div class="pp-view-all">Give Feedback →</div>
+        </div>
+
+        <!-- Development Plan -->
+        <div class="pp-card">
+          <div class="pp-card-header">
+            <span class="pp-card-title">Development Plan</span>
+            <div class="pp-card-actions">
+              <button class="pp-card-action"><i class="bi bi-pencil"></i></button>
+            </div>
+          </div>
+          <div class="pp-card-body">
+            <div class="pp-data-row">
+              <span class="pp-data-label">Focus Area</span>
+              <span class="pp-data-value">Leadership</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Target Role</span>
+              <span class="pp-data-value">Senior Manager</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Timeline</span>
+              <span class="pp-data-value">18 months</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Mentor</span>
+              <span class="pp-data-value highlight">Sarah Chen</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    `,
+
+    career: () => `
+      <h1 class="pp-section-title">Career History</h1>
+
+      <div class="pp-cards-grid">
+        <!-- Current Position -->
+        <div class="pp-card">
+          <div class="pp-card-header">
+            <span class="pp-card-title">Current Position</span>
+          </div>
+          <div class="pp-card-body">
+            <div class="pp-data-row">
+              <span class="pp-data-label">Title</span>
+              <span class="pp-data-value highlight">${employee.title}</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Department</span>
+              <span class="pp-data-value">${employee.department}</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Start Date</span>
+              <span class="pp-data-value">Jan 15, 2022</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Time in Role</span>
+              <span class="pp-data-value">3 years</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Career Timeline -->
+        <div class="pp-card">
+          <div class="pp-card-header">
+            <span class="pp-card-title">Position History</span>
+          </div>
+          <div class="pp-card-body">
+            <div class="pp-data-row">
+              <span class="pp-data-label">2022 - Present</span>
+              <span class="pp-data-value highlight">Marketing Manager</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">2019 - 2022</span>
+              <span class="pp-data-value">Senior Marketing Analyst</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">2017 - 2019</span>
+              <span class="pp-data-value">Marketing Analyst</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">2014 - 2017</span>
+              <span class="pp-data-value">Marketing Coordinator</span>
+            </div>
+          </div>
+          <div class="pp-view-all">View Full Timeline →</div>
+        </div>
+
+        <!-- Projects -->
+        <div class="pp-card">
+          <div class="pp-card-header">
+            <span class="pp-card-title">Key Projects</span>
+            <div class="pp-card-actions">
+              <button class="pp-card-action"><i class="bi bi-plus-lg"></i></button>
+            </div>
+          </div>
+          <div class="pp-card-body">
+            <div class="pp-data-row">
+              <span class="pp-data-label">Brand Refresh Campaign</span>
+              <span class="pp-data-value" style="color: #22c55e;">Completed</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Digital Marketing Strategy</span>
+              <span class="pp-data-value" style="color: #22c55e;">Completed</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Q1 Product Launch</span>
+              <span class="pp-data-value highlight">In Progress</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Customer Analytics Platform</span>
+              <span class="pp-data-value" style="color: #22c55e;">Completed</span>
+            </div>
+          </div>
+          <div class="pp-view-all">View All Projects →</div>
+        </div>
+
+        <!-- Achievements -->
+        <div class="pp-card">
+          <div class="pp-card-header">
+            <span class="pp-card-title">Achievements</span>
+          </div>
+          <div class="pp-card-body">
+            <div class="pp-data-row">
+              <span class="pp-data-label">2025</span>
+              <span class="pp-data-value highlight">Marketing Excellence Award</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">2024</span>
+              <span class="pp-data-value">Top Performer Q3</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">2023</span>
+              <span class="pp-data-value">Innovation Champion</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">2021</span>
+              <span class="pp-data-value">Rising Star Award</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Second Row - Work Experience Outside Company -->
+      <div class="pp-cards-grid" style="margin-top: 1rem; grid-template-columns: repeat(2, 1fr);">
+        <!-- Prior Employment -->
+        <div class="pp-card">
+          <div class="pp-card-header">
+            <span class="pp-card-title">Prior Employment</span>
+            <div class="pp-card-actions">
+              <button class="pp-card-action"><i class="bi bi-pencil"></i></button>
+            </div>
+          </div>
+          <div class="pp-card-body">
+            <div class="pp-data-row">
+              <span class="pp-data-label">2012 - 2014</span>
+              <span class="pp-data-value">Marketing Associate @ TechCorp Inc</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">2010 - 2012</span>
+              <span class="pp-data-value">Marketing Intern @ StartupXYZ</span>
+            </div>
+          </div>
+          <div class="pp-view-all">Add Experience →</div>
+        </div>
+
+        <!-- Career Stats -->
+        <div class="pp-card">
+          <div class="pp-card-header">
+            <span class="pp-card-title">Career Summary</span>
+          </div>
+          <div class="pp-card-body">
+            <div class="pp-data-row">
+              <span class="pp-data-label">Total Experience</span>
+              <span class="pp-data-value highlight">12 years</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Years at Company</span>
+              <span class="pp-data-value">6 years</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Promotions</span>
+              <span class="pp-data-value">3</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Projects Completed</span>
+              <span class="pp-data-value">24</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    `,
+
+    succession: () => `
+      <h1 class="pp-section-title">Succession</h1>
+
+      <div class="pp-cards-grid">
+        <!-- Succession Status -->
+        <div class="pp-card">
+          <div class="pp-card-header">
+            <span class="pp-card-title">My Succession Status</span>
+          </div>
+          <div class="pp-card-body">
+            <div class="pp-data-row">
+              <span class="pp-data-label">Identified As</span>
+              <span class="pp-data-value highlight">High Potential</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Readiness</span>
+              <span class="pp-data-value">Ready in 1-2 years</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Nominated For</span>
+              <span class="pp-data-value">Senior Manager</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Last Updated</span>
+              <span class="pp-data-value">Dec 15, 2025</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Potential Successors -->
+        <div class="pp-card">
+          <div class="pp-card-header">
+            <span class="pp-card-title">My Potential Successors</span>
+            <div class="pp-card-actions">
+              <button class="pp-card-action"><i class="bi bi-plus-lg"></i></button>
+            </div>
+          </div>
+          <div class="pp-card-body">
+            <div class="pp-data-row">
+              <span class="pp-data-label">James Wilson</span>
+              <span class="pp-data-value">Ready Now</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Emily Rodriguez</span>
+              <span class="pp-data-value">Ready in 1 year</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Michael Park</span>
+              <span class="pp-data-value">Ready in 2 years</span>
+            </div>
+          </div>
+          <div class="pp-view-all">Manage Successors →</div>
+        </div>
+
+        <!-- Career Path -->
+        <div class="pp-card">
+          <div class="pp-card-header">
+            <span class="pp-card-title">Career Path</span>
+          </div>
+          <div class="pp-card-body">
+            <div class="pp-data-row">
+              <span class="pp-data-label">Current</span>
+              <span class="pp-data-value">Marketing Manager</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Next Step</span>
+              <span class="pp-data-value highlight">Senior Manager</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Long-term</span>
+              <span class="pp-data-value">Director</span>
+            </div>
+          </div>
+          <div class="pp-view-all">View Career Map →</div>
+        </div>
+
+        <!-- Talent Pool -->
+        <div class="pp-card">
+          <div class="pp-card-header">
+            <span class="pp-card-title">Talent Pool Membership</span>
+          </div>
+          <div class="pp-card-body">
+            <div class="pp-data-row">
+              <span class="pp-data-label">Pool Name</span>
+              <span class="pp-data-value">Future Leaders</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Added Date</span>
+              <span class="pp-data-value">Mar 1, 2024</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Status</span>
+              <span class="pp-data-value" style="color: #22c55e;">Active</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    `,
+
+    learning: () => `
+      <h1 class="pp-section-title">Learning and Development</h1>
+
+      <div class="pp-cards-grid">
+        <!-- Current Learning -->
+        <div class="pp-card">
+          <div class="pp-card-header">
+            <span class="pp-card-title">In Progress</span>
+          </div>
+          <div class="pp-card-body">
+            <div class="pp-data-row">
+              <span class="pp-data-label">Leadership Excellence</span>
+              <span class="pp-data-value highlight">75%</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Data Analytics Fundamentals</span>
+              <span class="pp-data-value">45%</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Project Management Pro</span>
+              <span class="pp-data-value">20%</span>
+            </div>
+          </div>
+          <div class="pp-view-all">Continue Learning →</div>
+        </div>
+
+        <!-- Completed -->
+        <div class="pp-card">
+          <div class="pp-card-header">
+            <span class="pp-card-title">Completed Courses</span>
+          </div>
+          <div class="pp-card-body">
+            <div class="pp-data-row">
+              <span class="pp-data-label">2025</span>
+              <span class="pp-data-value highlight">12 courses</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">2024</span>
+              <span class="pp-data-value">8 courses</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Total Hours</span>
+              <span class="pp-data-value">156 hrs</span>
+            </div>
+          </div>
+          <div class="pp-view-all">View Transcript →</div>
+        </div>
+
+        <!-- Certifications -->
+        <div class="pp-card">
+          <div class="pp-card-header">
+            <span class="pp-card-title">Certifications</span>
+            <div class="pp-card-actions">
+              <button class="pp-card-action"><i class="bi bi-plus-lg"></i></button>
+            </div>
+          </div>
+          <div class="pp-card-body">
+            <div class="pp-data-row">
+              <span class="pp-data-label">PMP</span>
+              <span class="pp-data-value" style="color: #22c55e;">Active</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Google Analytics</span>
+              <span class="pp-data-value" style="color: #22c55e;">Active</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">AWS Cloud Practitioner</span>
+              <span class="pp-data-value" style="color: #f59e0b;">Expiring Soon</span>
+            </div>
+          </div>
+          <div class="pp-view-all">Manage Certifications →</div>
+        </div>
+
+        <!-- Recommended -->
+        <div class="pp-card">
+          <div class="pp-card-header">
+            <span class="pp-card-title">Recommended for You</span>
+          </div>
+          <div class="pp-card-body">
+            <div class="pp-data-row">
+              <span class="pp-data-label">Executive Presence</span>
+              <span class="pp-data-value">4.8 ★</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Strategic Planning</span>
+              <span class="pp-data-value">4.6 ★</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Financial Acumen</span>
+              <span class="pp-data-value">4.9 ★</span>
+            </div>
+          </div>
+          <div class="pp-view-all">Browse Catalog →</div>
+        </div>
+      </div>
+    `,
+
+    talent: () => `
+      <h1 class="pp-section-title">Talent Profile</h1>
+
+      <div class="pp-cards-grid">
+        <!-- Skills -->
+        <div class="pp-card">
+          <div class="pp-card-header">
+            <span class="pp-card-title">Skills & Competencies</span>
+            <div class="pp-card-actions">
+              <button class="pp-card-action"><i class="bi bi-plus-lg"></i></button>
+            </div>
+          </div>
+          <div class="pp-card-body">
+            <div class="pp-data-row">
+              <span class="pp-data-label">Marketing Strategy</span>
+              <span class="pp-data-value highlight">Expert</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Team Leadership</span>
+              <span class="pp-data-value highlight">Expert</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Data Analysis</span>
+              <span class="pp-data-value">Advanced</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Project Management</span>
+              <span class="pp-data-value">Advanced</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Budget Management</span>
+              <span class="pp-data-value">Intermediate</span>
+            </div>
+          </div>
+          <div class="pp-view-all">Manage Skills →</div>
+        </div>
+
+        <!-- Experience -->
+        <div class="pp-card">
+          <div class="pp-card-header">
+            <span class="pp-card-title">Experience</span>
+          </div>
+          <div class="pp-card-body">
+            <div class="pp-data-row">
+              <span class="pp-data-label">Total Years</span>
+              <span class="pp-data-value highlight">12 years</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">At Company</span>
+              <span class="pp-data-value">6 years</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">In Role</span>
+              <span class="pp-data-value">3 years</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Industries</span>
+              <span class="pp-data-value">Tech, Finance</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Languages -->
+        <div class="pp-card">
+          <div class="pp-card-header">
+            <span class="pp-card-title">Languages</span>
+            <div class="pp-card-actions">
+              <button class="pp-card-action"><i class="bi bi-plus-lg"></i></button>
+            </div>
+          </div>
+          <div class="pp-card-body">
+            <div class="pp-data-row">
+              <span class="pp-data-label">English</span>
+              <span class="pp-data-value highlight">Native</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Spanish</span>
+              <span class="pp-data-value">Fluent</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">French</span>
+              <span class="pp-data-value">Conversational</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobility -->
+        <div class="pp-card">
+          <div class="pp-card-header">
+            <span class="pp-card-title">Mobility & Preferences</span>
+            <div class="pp-card-actions">
+              <button class="pp-card-action"><i class="bi bi-pencil"></i></button>
+            </div>
+          </div>
+          <div class="pp-card-body">
+            <div class="pp-data-row">
+              <span class="pp-data-label">Willing to Relocate</span>
+              <span class="pp-data-value" style="color: #22c55e;">Yes</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Travel</span>
+              <span class="pp-data-value">Up to 25%</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Preferred Locations</span>
+              <span class="pp-data-value">NYC, LA, London</span>
+            </div>
+            <div class="pp-data-row">
+              <span class="pp-data-label">Remote Work</span>
+              <span class="pp-data-value">Hybrid preferred</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    `
+  };
+
+  // Render the main layout
+  content.innerHTML = `
+    <div class="people-profile">
+
+      <!-- Top Bar -->
+      <div class="pp-topbar">
+        <div class="pp-topbar-title">People Profile</div>
+        <div class="pp-topbar-actions">
+          <button class="pp-topbar-btn">Public Profile</button>
+          <button class="pp-topbar-btn active">
+            <i class="bi bi-calendar3 me-1"></i>As of Today
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Layout -->
+      <div class="pp-layout">
+
+        <!-- Left Sidebar -->
+        <div class="pp-sidebar">
+
+          <!-- Profile Card -->
+          <div class="pp-profile-card">
+            <div class="pp-cover"></div>
+            <div class="pp-avatar-container">
+              <div class="pp-avatar">${employee.firstName.charAt(0)}${employee.lastName.charAt(0)}</div>
+              <div class="pp-status-badge ooo">
+                <span class="pp-status-dot"></span>
+                ${employee.status} · Back ${employee.returnDate}
+              </div>
+            </div>
+            <div class="pp-profile-info">
+              <h2 class="pp-name">${employee.firstName} ${employee.lastName} <i class="bi bi-linkedin" style="font-size: 0.9rem; color: #0077b5;"></i></h2>
+              <div class="pp-title">${employee.title}</div>
+              <div class="pp-meta">${employee.department} (${employee.employeeId})</div>
+              <div class="pp-direct-reports">
+                <i class="bi bi-people"></i>
+                Direct Reports: ${employee.directReports}
+              </div>
+              <button class="pp-all-actions">
+                <i class="bi bi-grid-3x3-gap"></i>
+                All Actions
+              </button>
+            </div>
+          </div>
+
+          <!-- Navigation -->
+          <nav class="pp-nav">
+            ${navItems.map(item => `
+              <div class="pp-nav-item ${item.active ? 'active' : ''}" data-section="${item.id}">
+                <i class="bi ${item.icon}"></i>
+                <span>${item.label}</span>
+              </div>
+            `).join('')}
+          </nav>
+
+        </div>
+
+        <!-- Main Content -->
+        <div class="pp-content" id="pp-content-area">
+          ${sectionContent.personal()}
+        </div>
+
+      </div>
+
+    </div>
+  `;
+
+  // Add navigation click handlers
+  const contentArea = document.getElementById('pp-content-area');
+  content.querySelectorAll('.pp-nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      // Update active state
+      content.querySelectorAll('.pp-nav-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+
+      // Update content
+      const sectionId = item.dataset.section;
+      if (sectionContent[sectionId]) {
+        contentArea.innerHTML = sectionContent[sectionId]();
+      }
+    });
+  });
+}
 
 function renderSeekerHome() {
   const content = document.getElementById('content-area');
