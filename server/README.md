@@ -4,22 +4,34 @@ Backend API server for connecting to the MySQL database.
 
 ## Prerequisites
 
-- Node.js 18+ (https://nodejs.org/)
+**Option A (Recommended):** Bun - https://bun.sh
 
-## Setup
+**Option B:** Node.js 18+ - https://nodejs.org
 
-1. Install dependencies:
+## Setup with Bun (Recommended)
+
+```bash
+cd server
+bun install
+bun start
+```
+
+For development with hot reload:
+```bash
+bun dev
+```
+
+## Setup with Node.js
+
 ```bash
 cd server
 npm install
+npm run start:node
 ```
 
-2. Start the server:
-```bash
-npm start
-```
+## Server
 
-3. The server will run on http://localhost:3000
+The server will run on http://localhost:3000
 
 ## API Endpoints
 
