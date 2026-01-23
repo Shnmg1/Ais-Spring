@@ -15,7 +15,6 @@ let currentRole = 'seeker';
 const navData = {
   seeker: [
     { name: 'Home', icon: 'bi-house-door', id: 'seeker-home' },
-    { name: 'People Profile', icon: 'bi-person-vcard', id: 'seeker-people-profile' },
     { name: 'My Career', icon: 'bi-person-badge', id: 'seeker-profile' },
     { name: 'Career History', icon: 'bi-clock-history', id: 'seeker-career' },
     { name: 'Learning Paths', icon: 'bi-book', id: 'seeker-learning' },
@@ -211,7 +210,7 @@ function renderShell(role) {
         <span>Alex Chen</span>
       </a>
       <ul class="dropdown-menu dropdown-menu-end animate-slide">
-        <li><a class="dropdown-item" href="#">Profile</a></li>
+        <li><a class="dropdown-item" href="#" onclick="showPublicProfileModal(); return false;">Public Profile</a></li>
         <li><a class="dropdown-item" href="#" onclick="navigate('settings'); return false;">Settings</a></li>
         <li><hr class="dropdown-divider"></li>
         <li><a class="dropdown-item" href="#">Logout</a></li>
@@ -279,7 +278,6 @@ function navigate(routeId) {
   const routes = {
     // Job Seeker
     'seeker-home': renderSeekerHome,
-    'seeker-people-profile': renderPeopleProfile,
     'seeker-profile': renderSeekerProfile,
     'seeker-career': renderCareer,
     'seeker-learning': renderSeekerLearning,
@@ -374,1110 +372,6 @@ function renderSettings() {
 // ============================================================================
 // JOB SEEKER VIEWS
 // ============================================================================
-
-// ============================================================================
-// PEOPLE PROFILE - Premium Editorial Design
-// ============================================================================
-
-function renderPeopleProfile() {
-  const content = document.getElementById('content-area');
-  
-  // Employee data (would come from database in production)
-  const employee = {
-    firstName: 'Molly',
-    lastName: 'Huddleston',
-    title: 'Marketing Manager',
-    department: 'Market Research',
-    employeeId: '5000131',
-    directReports: 6,
-    status: 'Out of Office',
-    returnDate: 'Jan 28, 2026',
-    personal: {
-      salutation: 'Mrs.',
-      gender: '••••••',
-      globalInfo: 'United States (USA)',
-      dateOfBirth: 'Sep 15, 1980',
-      countryOfBirth: 'United States (USA)',
-      personId: 'M1'
-    },
-    address: {
-      type: 'Home',
-      line1: '2335 Carriage Court',
-      city: 'San Diego',
-      state: 'California (CA)',
-      country: 'United States (USA)'
-    },
-    contacts: [
-      { type: 'Business', label: 'B', icon: 'bi-telephone', value: '+1 416 6172297', primary: true },
-      { type: 'Home', label: 'H', icon: 'bi-telephone', value: '+1 455 4455566', primary: false },
-      { type: 'Business', label: 'B', icon: 'bi-envelope', value: 'molly.huddleston@bestrunsap.com', primary: true }
-    ],
-    nationalId: {
-      country: 'United States (USA)',
-      cardType: 'Social Security Number',
-      number: '••••••',
-      isPrimary: true
-    },
-    emergency: {
-      name: 'John Mayer',
-      relationship: 'Other (relation_Other)',
-      phone: '619-972-4317',
-      isPrimary: true
-    },
-    dependents: [
-      { firstName: 'Sky', lastName: 'Mayer', relationship: 'Child (2)', dob: 'Mar 2, 2010' }
-    ],
-    payment: {
-      mainMethod: 'Cash (09)',
-      accountNumber: '134934380',
-      payroll: [
-        { method: 'Bank Transfer (05)', amount: null },
-        { method: 'Cash (09)', amount: null }
-      ]
-    }
-  };
-
-  const navItems = [
-    { id: 'personal', icon: 'bi-person', label: 'Personal Data', active: true },
-    { id: 'time', icon: 'bi-clock', label: 'Time Management' },
-    { id: 'performance', icon: 'bi-graph-up-arrow', label: 'Performance and Goals' },
-    { id: 'career', icon: 'bi-clock-history', label: 'Career History' },
-    { id: 'succession', icon: 'bi-diagram-3', label: 'Succession' },
-    { id: 'learning', icon: 'bi-mortarboard', label: 'Learning and Development' },
-    { id: 'talent', icon: 'bi-star', label: 'Talent Profile' }
-  ];
-
-  // Section content generators
-  const sectionContent = {
-    personal: () => `
-      <h1 class="pp-section-title">Personal Data</h1>
-      
-      <!-- First Row - 2x2 Grid -->
-      <div class="pp-cards-grid" style="margin-bottom: 1rem;">
-        
-        <!-- Personal Information -->
-        <div class="pp-card">
-          <div class="pp-card-header">
-            <span class="pp-card-title">Personal Information</span>
-            <div class="pp-card-actions">
-              <button class="pp-card-action warning"><i class="bi bi-exclamation-triangle"></i></button>
-              <button class="pp-card-action"><i class="bi bi-pencil"></i></button>
-              <button class="pp-card-action"><i class="bi bi-arrow-counterclockwise"></i></button>
-            </div>
-          </div>
-          <div class="pp-card-body">
-            <div class="pp-data-row">
-              <span class="pp-data-label">First Name</span>
-              <span class="pp-data-value">${employee.firstName}</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Last Name</span>
-              <span class="pp-data-value">${employee.lastName}</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Salutation</span>
-              <span class="pp-data-value">${employee.personal.salutation}</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Gender</span>
-              <span class="pp-data-value masked">${employee.personal.gender}<span class="pp-show-link">Show</span></span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Global Information</span>
-              <span class="pp-data-value">${employee.personal.globalInfo}</span>
-            </div>
-          </div>
-          <div class="pp-view-all">View All →</div>
-        </div>
-        
-        <!-- Biographical Information -->
-        <div class="pp-card">
-          <div class="pp-card-header">
-            <span class="pp-card-title">Biographical Information</span>
-            <div class="pp-card-actions">
-              <button class="pp-card-action"><i class="bi bi-pencil"></i></button>
-            </div>
-          </div>
-          <div class="pp-card-body">
-            <div class="pp-data-row">
-              <span class="pp-data-label">Person ID</span>
-              <span class="pp-data-value">${employee.personal.personId}</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Date of Birth</span>
-              <span class="pp-data-value">${employee.personal.dateOfBirth}</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Country of Birth</span>
-              <span class="pp-data-value">${employee.personal.countryOfBirth}</span>
-            </div>
-          </div>
-          <div class="pp-view-all">View All →</div>
-        </div>
-        
-        <!-- Addresses -->
-        <div class="pp-card">
-          <div class="pp-card-header">
-            <span class="pp-card-title">Addresses</span>
-            <div class="pp-card-actions">
-              <button class="pp-card-action warning"><i class="bi bi-exclamation-triangle"></i></button>
-              <button class="pp-card-action"><i class="bi bi-pencil"></i></button>
-              <button class="pp-card-action"><i class="bi bi-arrow-counterclockwise"></i></button>
-            </div>
-          </div>
-          <div class="pp-card-body">
-            <div class="pp-data-row">
-              <span class="pp-data-label">Address Type</span>
-              <span class="pp-data-value">${employee.address.type} (home)</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Country</span>
-              <span class="pp-data-value">${employee.address.country}</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Address Line 1</span>
-              <span class="pp-data-value">${employee.address.line1}</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">City</span>
-              <span class="pp-data-value">${employee.address.city}</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">State</span>
-              <span class="pp-data-value">${employee.address.state}</span>
-            </div>
-          </div>
-          <div class="pp-view-all">View All →</div>
-        </div>
-        
-        <!-- Contact Information -->
-        <div class="pp-card">
-          <div class="pp-card-header">
-            <span class="pp-card-title">Contact Information</span>
-            <div class="pp-card-actions">
-              <button class="pp-card-action"><i class="bi bi-pencil"></i></button>
-            </div>
-          </div>
-          <div class="pp-card-body">
-            ${employee.contacts.map(c => `
-              <div class="pp-contact-item">
-                <div class="pp-contact-icon">
-                  <i class="bi ${c.icon}"></i>
-                </div>
-                <div class="pp-contact-details">
-                  <div class="pp-contact-type">
-                    ${c.type} (${c.label})
-                    ${c.primary ? '<i class="bi bi-star-fill primary"></i>' : ''}
-                  </div>
-                  <div class="pp-contact-value">${c.value}</div>
-                </div>
-              </div>
-            `).join('')}
-          </div>
-          <div class="pp-view-all">View All →</div>
-        </div>
-        
-      </div>
-      
-      <!-- Second Row - 4 columns -->
-      <div class="pp-cards-grid" style="grid-template-columns: repeat(4, 1fr);">
-        
-        <!-- National ID -->
-        <div class="pp-card">
-          <div class="pp-card-header">
-            <span class="pp-card-title">National ID Information</span>
-            <div class="pp-card-actions">
-              <button class="pp-card-action warning"><i class="bi bi-exclamation-triangle"></i></button>
-              <button class="pp-card-action"><i class="bi bi-pencil"></i></button>
-            </div>
-          </div>
-          <div class="pp-card-body">
-            <div class="pp-data-row">
-              <span class="pp-data-label">Country</span>
-              <span class="pp-data-value">${employee.nationalId.country}</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Card Type</span>
-              <span class="pp-data-value">${employee.nationalId.cardType}</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">National ID</span>
-              <span class="pp-data-value masked">${employee.nationalId.number}<span class="pp-show-link">Show</span></span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Is Primary</span>
-              <span class="pp-data-value">${employee.nationalId.isPrimary ? 'Yes' : 'No'}</span>
-            </div>
-          </div>
-          <div class="pp-view-all">View All →</div>
-        </div>
-        
-        <!-- Emergency Contact -->
-        <div class="pp-card">
-          <div class="pp-card-header">
-            <span class="pp-card-title">Primary Emergency Contact</span>
-            <div class="pp-card-actions">
-              <button class="pp-card-action"><i class="bi bi-pencil"></i></button>
-            </div>
-          </div>
-          <div class="pp-card-body">
-            <div class="pp-data-row">
-              <span class="pp-data-label">Name</span>
-              <span class="pp-data-value">${employee.emergency.name}</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Relationship</span>
-              <span class="pp-data-value">${employee.emergency.relationship}</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Phone</span>
-              <span class="pp-data-value highlight">${employee.emergency.phone}</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Is Primary</span>
-              <span class="pp-data-value">${employee.emergency.isPrimary ? 'Yes' : 'No'}</span>
-            </div>
-          </div>
-          <div class="pp-view-all">View All →</div>
-        </div>
-        
-        <!-- Dependents -->
-        <div class="pp-card">
-          <div class="pp-card-header">
-            <span class="pp-card-title">Dependents</span>
-            <div class="pp-card-actions">
-              <button class="pp-card-action"><i class="bi bi-pencil"></i></button>
-            </div>
-          </div>
-          <div class="pp-card-body">
-            ${employee.dependents.map(d => `
-              <div class="pp-data-row">
-                <span class="pp-data-label">First Name</span>
-                <span class="pp-data-value">${d.firstName}</span>
-              </div>
-              <div class="pp-data-row">
-                <span class="pp-data-label">Last Name</span>
-                <span class="pp-data-value">${d.lastName}</span>
-              </div>
-              <div class="pp-data-row">
-                <span class="pp-data-label">Relationship</span>
-                <span class="pp-data-value">${d.relationship}</span>
-              </div>
-              <div class="pp-data-row">
-                <span class="pp-data-label">Date of Birth</span>
-                <span class="pp-data-value">${d.dob}</span>
-              </div>
-            `).join('')}
-          </div>
-          <div class="pp-view-all">View All →</div>
-        </div>
-        
-        <!-- Payment Information -->
-        <div class="pp-card">
-          <div class="pp-card-header">
-            <span class="pp-card-title">Payment Information</span>
-            <div class="pp-card-actions">
-              <button class="pp-card-action"><i class="bi bi-pencil"></i></button>
-              <button class="pp-card-action"><i class="bi bi-arrow-counterclockwise"></i></button>
-            </div>
-          </div>
-          <div class="pp-card-body">
-            <div class="pp-data-row">
-              <span class="pp-data-label">Main Payment Method</span>
-              <span class="pp-data-value">${employee.payment.mainMethod}</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Account</span>
-              <span class="pp-data-value">${employee.payment.accountNumber}</span>
-            </div>
-            ${employee.payment.payroll.map(p => `
-              <div class="pp-data-row">
-                <span class="pp-data-label">Payroll</span>
-                <span class="pp-data-value">${p.method}</span>
-              </div>
-            `).join('')}
-          </div>
-          <div class="pp-view-all">View All →</div>
-        </div>
-        
-      </div>
-    `,
-    
-    time: () => `
-      <h1 class="pp-section-title">Time Management</h1>
-      
-      <div class="pp-cards-grid">
-        <!-- Time Off Balance -->
-        <div class="pp-card">
-          <div class="pp-card-header">
-            <span class="pp-card-title">Time Off Balance</span>
-            <div class="pp-card-actions">
-              <button class="pp-card-action"><i class="bi bi-plus-lg"></i></button>
-            </div>
-          </div>
-          <div class="pp-card-body">
-            <div class="pp-data-row">
-              <span class="pp-data-label">Vacation Days</span>
-              <span class="pp-data-value highlight">12 days</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Sick Leave</span>
-              <span class="pp-data-value">8 days</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Personal Days</span>
-              <span class="pp-data-value">3 days</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Floating Holidays</span>
-              <span class="pp-data-value">2 days</span>
-            </div>
-          </div>
-          <div class="pp-view-all">Request Time Off →</div>
-        </div>
-        
-        <!-- Upcoming Time Off -->
-        <div class="pp-card">
-          <div class="pp-card-header">
-            <span class="pp-card-title">Upcoming Time Off</span>
-          </div>
-          <div class="pp-card-body">
-            <div class="pp-data-row">
-              <span class="pp-data-label">Jan 24 - Jan 28</span>
-              <span class="pp-data-value">Vacation (5 days)</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Feb 14</span>
-              <span class="pp-data-value">Personal Day</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Mar 10 - Mar 12</span>
-              <span class="pp-data-value">Conference</span>
-            </div>
-          </div>
-          <div class="pp-view-all">View Calendar →</div>
-        </div>
-        
-        <!-- Work Schedule -->
-        <div class="pp-card">
-          <div class="pp-card-header">
-            <span class="pp-card-title">Work Schedule</span>
-            <div class="pp-card-actions">
-              <button class="pp-card-action"><i class="bi bi-pencil"></i></button>
-            </div>
-          </div>
-          <div class="pp-card-body">
-            <div class="pp-data-row">
-              <span class="pp-data-label">Schedule Type</span>
-              <span class="pp-data-value">Hybrid</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Office Days</span>
-              <span class="pp-data-value">Tue, Wed, Thu</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Work Hours</span>
-              <span class="pp-data-value">9:00 AM - 5:30 PM</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Timezone</span>
-              <span class="pp-data-value">PST (UTC-8)</span>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Time Sheet Summary -->
-        <div class="pp-card">
-          <div class="pp-card-header">
-            <span class="pp-card-title">Time Sheet Summary</span>
-          </div>
-          <div class="pp-card-body">
-            <div class="pp-data-row">
-              <span class="pp-data-label">This Week</span>
-              <span class="pp-data-value highlight">32 / 40 hrs</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Last Week</span>
-              <span class="pp-data-value">42 hrs</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">MTD Average</span>
-              <span class="pp-data-value">41 hrs</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Status</span>
-              <span class="pp-data-value" style="color: #22c55e;">Approved</span>
-            </div>
-          </div>
-          <div class="pp-view-all">Submit Timesheet →</div>
-        </div>
-      </div>
-    `,
-    
-    performance: () => `
-      <h1 class="pp-section-title">Performance and Goals</h1>
-      
-      <div class="pp-cards-grid">
-        <!-- Current Goals -->
-        <div class="pp-card">
-          <div class="pp-card-header">
-            <span class="pp-card-title">Current Goals (Q1 2026)</span>
-            <div class="pp-card-actions">
-              <button class="pp-card-action"><i class="bi bi-plus-lg"></i></button>
-            </div>
-          </div>
-          <div class="pp-card-body">
-            <div class="pp-data-row">
-              <span class="pp-data-label">Lead Product Launch</span>
-              <span class="pp-data-value highlight">75% Complete</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Team Training Program</span>
-              <span class="pp-data-value">50% Complete</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Client Retention Target</span>
-              <span class="pp-data-value" style="color: #22c55e;">Achieved</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Process Optimization</span>
-              <span class="pp-data-value">25% Complete</span>
-            </div>
-          </div>
-          <div class="pp-view-all">Manage Goals →</div>
-        </div>
-        
-        <!-- Performance Rating -->
-        <div class="pp-card">
-          <div class="pp-card-header">
-            <span class="pp-card-title">Performance Ratings</span>
-          </div>
-          <div class="pp-card-body">
-            <div class="pp-data-row">
-              <span class="pp-data-label">2025 Annual Review</span>
-              <span class="pp-data-value highlight">Exceeds Expectations</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">2024 Annual Review</span>
-              <span class="pp-data-value">Meets Expectations</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">2023 Annual Review</span>
-              <span class="pp-data-value">Exceeds Expectations</span>
-            </div>
-          </div>
-          <div class="pp-view-all">View History →</div>
-        </div>
-        
-        <!-- Feedback -->
-        <div class="pp-card">
-          <div class="pp-card-header">
-            <span class="pp-card-title">Recent Feedback</span>
-          </div>
-          <div class="pp-card-body">
-            <div class="pp-data-row">
-              <span class="pp-data-label">Jan 15, 2026</span>
-              <span class="pp-data-value">Manager Check-in</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Dec 20, 2025</span>
-              <span class="pp-data-value">Peer Review</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Nov 30, 2025</span>
-              <span class="pp-data-value">Project Feedback</span>
-            </div>
-          </div>
-          <div class="pp-view-all">Give Feedback →</div>
-        </div>
-        
-        <!-- Development Plan -->
-        <div class="pp-card">
-          <div class="pp-card-header">
-            <span class="pp-card-title">Development Plan</span>
-            <div class="pp-card-actions">
-              <button class="pp-card-action"><i class="bi bi-pencil"></i></button>
-            </div>
-          </div>
-          <div class="pp-card-body">
-            <div class="pp-data-row">
-              <span class="pp-data-label">Focus Area</span>
-              <span class="pp-data-value">Leadership</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Target Role</span>
-              <span class="pp-data-value">Senior Manager</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Timeline</span>
-              <span class="pp-data-value">18 months</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Mentor</span>
-              <span class="pp-data-value highlight">Sarah Chen</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    `,
-
-    career: () => `
-      <h1 class="pp-section-title">Career History</h1>
-
-      <div class="pp-cards-grid">
-        <!-- Current Position -->
-        <div class="pp-card">
-          <div class="pp-card-header">
-            <span class="pp-card-title">Current Position</span>
-          </div>
-          <div class="pp-card-body">
-            <div class="pp-data-row">
-              <span class="pp-data-label">Title</span>
-              <span class="pp-data-value highlight">${employee.title}</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Department</span>
-              <span class="pp-data-value">${employee.department}</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Start Date</span>
-              <span class="pp-data-value">Jan 15, 2022</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Time in Role</span>
-              <span class="pp-data-value">3 years</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Career Timeline -->
-        <div class="pp-card">
-          <div class="pp-card-header">
-            <span class="pp-card-title">Position History</span>
-          </div>
-          <div class="pp-card-body">
-            <div class="pp-data-row">
-              <span class="pp-data-label">2022 - Present</span>
-              <span class="pp-data-value highlight">Marketing Manager</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">2019 - 2022</span>
-              <span class="pp-data-value">Senior Marketing Analyst</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">2017 - 2019</span>
-              <span class="pp-data-value">Marketing Analyst</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">2014 - 2017</span>
-              <span class="pp-data-value">Marketing Coordinator</span>
-            </div>
-          </div>
-          <div class="pp-view-all">View Full Timeline →</div>
-        </div>
-
-        <!-- Projects -->
-        <div class="pp-card">
-          <div class="pp-card-header">
-            <span class="pp-card-title">Key Projects</span>
-            <div class="pp-card-actions">
-              <button class="pp-card-action"><i class="bi bi-plus-lg"></i></button>
-            </div>
-          </div>
-          <div class="pp-card-body">
-            <div class="pp-data-row">
-              <span class="pp-data-label">Brand Refresh Campaign</span>
-              <span class="pp-data-value" style="color: #22c55e;">Completed</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Digital Marketing Strategy</span>
-              <span class="pp-data-value" style="color: #22c55e;">Completed</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Q1 Product Launch</span>
-              <span class="pp-data-value highlight">In Progress</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Customer Analytics Platform</span>
-              <span class="pp-data-value" style="color: #22c55e;">Completed</span>
-            </div>
-          </div>
-          <div class="pp-view-all">View All Projects →</div>
-        </div>
-
-        <!-- Achievements -->
-        <div class="pp-card">
-          <div class="pp-card-header">
-            <span class="pp-card-title">Achievements</span>
-          </div>
-          <div class="pp-card-body">
-            <div class="pp-data-row">
-              <span class="pp-data-label">2025</span>
-              <span class="pp-data-value highlight">Marketing Excellence Award</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">2024</span>
-              <span class="pp-data-value">Top Performer Q3</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">2023</span>
-              <span class="pp-data-value">Innovation Champion</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">2021</span>
-              <span class="pp-data-value">Rising Star Award</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Second Row - Work Experience Outside Company -->
-      <div class="pp-cards-grid" style="margin-top: 1rem; grid-template-columns: repeat(2, 1fr);">
-        <!-- Prior Employment -->
-        <div class="pp-card">
-          <div class="pp-card-header">
-            <span class="pp-card-title">Prior Employment</span>
-            <div class="pp-card-actions">
-              <button class="pp-card-action"><i class="bi bi-pencil"></i></button>
-            </div>
-          </div>
-          <div class="pp-card-body">
-            <div class="pp-data-row">
-              <span class="pp-data-label">2012 - 2014</span>
-              <span class="pp-data-value">Marketing Associate @ TechCorp Inc</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">2010 - 2012</span>
-              <span class="pp-data-value">Marketing Intern @ StartupXYZ</span>
-            </div>
-          </div>
-          <div class="pp-view-all">Add Experience →</div>
-        </div>
-
-        <!-- Career Stats -->
-        <div class="pp-card">
-          <div class="pp-card-header">
-            <span class="pp-card-title">Career Summary</span>
-          </div>
-          <div class="pp-card-body">
-            <div class="pp-data-row">
-              <span class="pp-data-label">Total Experience</span>
-              <span class="pp-data-value highlight">12 years</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Years at Company</span>
-              <span class="pp-data-value">6 years</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Promotions</span>
-              <span class="pp-data-value">3</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Projects Completed</span>
-              <span class="pp-data-value">24</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    `,
-
-    succession: () => `
-      <h1 class="pp-section-title">Succession</h1>
-
-      <div class="pp-cards-grid">
-        <!-- Succession Status -->
-        <div class="pp-card">
-          <div class="pp-card-header">
-            <span class="pp-card-title">My Succession Status</span>
-          </div>
-          <div class="pp-card-body">
-            <div class="pp-data-row">
-              <span class="pp-data-label">Identified As</span>
-              <span class="pp-data-value highlight">High Potential</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Readiness</span>
-              <span class="pp-data-value">Ready in 1-2 years</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Nominated For</span>
-              <span class="pp-data-value">Senior Manager</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Last Updated</span>
-              <span class="pp-data-value">Dec 15, 2025</span>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Potential Successors -->
-        <div class="pp-card">
-          <div class="pp-card-header">
-            <span class="pp-card-title">My Potential Successors</span>
-            <div class="pp-card-actions">
-              <button class="pp-card-action"><i class="bi bi-plus-lg"></i></button>
-            </div>
-          </div>
-          <div class="pp-card-body">
-            <div class="pp-data-row">
-              <span class="pp-data-label">James Wilson</span>
-              <span class="pp-data-value">Ready Now</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Emily Rodriguez</span>
-              <span class="pp-data-value">Ready in 1 year</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Michael Park</span>
-              <span class="pp-data-value">Ready in 2 years</span>
-            </div>
-          </div>
-          <div class="pp-view-all">Manage Successors →</div>
-        </div>
-        
-        <!-- Career Path -->
-        <div class="pp-card">
-          <div class="pp-card-header">
-            <span class="pp-card-title">Career Path</span>
-          </div>
-          <div class="pp-card-body">
-            <div class="pp-data-row">
-              <span class="pp-data-label">Current</span>
-              <span class="pp-data-value">Marketing Manager</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Next Step</span>
-              <span class="pp-data-value highlight">Senior Manager</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Long-term</span>
-              <span class="pp-data-value">Director</span>
-            </div>
-          </div>
-          <div class="pp-view-all">View Career Map →</div>
-        </div>
-        
-        <!-- Talent Pool -->
-        <div class="pp-card">
-          <div class="pp-card-header">
-            <span class="pp-card-title">Talent Pool Membership</span>
-          </div>
-          <div class="pp-card-body">
-            <div class="pp-data-row">
-              <span class="pp-data-label">Pool Name</span>
-              <span class="pp-data-value">Future Leaders</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Added Date</span>
-              <span class="pp-data-value">Mar 1, 2024</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Status</span>
-              <span class="pp-data-value" style="color: #22c55e;">Active</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    `,
-    
-    learning: () => `
-      <h1 class="pp-section-title">Learning and Development</h1>
-      
-      <div class="pp-cards-grid">
-        <!-- Current Learning -->
-        <div class="pp-card">
-          <div class="pp-card-header">
-            <span class="pp-card-title">In Progress</span>
-          </div>
-          <div class="pp-card-body">
-            <div class="pp-data-row">
-              <span class="pp-data-label">Leadership Excellence</span>
-              <span class="pp-data-value highlight">75%</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Data Analytics Fundamentals</span>
-              <span class="pp-data-value">45%</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Project Management Pro</span>
-              <span class="pp-data-value">20%</span>
-            </div>
-          </div>
-          <div class="pp-view-all">Continue Learning →</div>
-        </div>
-        
-        <!-- Completed -->
-        <div class="pp-card">
-          <div class="pp-card-header">
-            <span class="pp-card-title">Completed Courses</span>
-          </div>
-          <div class="pp-card-body">
-            <div class="pp-data-row">
-              <span class="pp-data-label">2025</span>
-              <span class="pp-data-value highlight">12 courses</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">2024</span>
-              <span class="pp-data-value">8 courses</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Total Hours</span>
-              <span class="pp-data-value">156 hrs</span>
-            </div>
-          </div>
-          <div class="pp-view-all">View Transcript →</div>
-        </div>
-        
-        <!-- Certifications -->
-        <div class="pp-card">
-          <div class="pp-card-header">
-            <span class="pp-card-title">Certifications</span>
-            <div class="pp-card-actions">
-              <button class="pp-card-action"><i class="bi bi-plus-lg"></i></button>
-            </div>
-          </div>
-          <div class="pp-card-body">
-            <div class="pp-data-row">
-              <span class="pp-data-label">PMP</span>
-              <span class="pp-data-value" style="color: #22c55e;">Active</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Google Analytics</span>
-              <span class="pp-data-value" style="color: #22c55e;">Active</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">AWS Cloud Practitioner</span>
-              <span class="pp-data-value" style="color: #f59e0b;">Expiring Soon</span>
-            </div>
-          </div>
-          <div class="pp-view-all">Manage Certifications →</div>
-        </div>
-        
-        <!-- Recommended -->
-        <div class="pp-card">
-          <div class="pp-card-header">
-            <span class="pp-card-title">Recommended for You</span>
-          </div>
-          <div class="pp-card-body">
-            <div class="pp-data-row">
-              <span class="pp-data-label">Executive Presence</span>
-              <span class="pp-data-value">4.8 ★</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Strategic Planning</span>
-              <span class="pp-data-value">4.6 ★</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Financial Acumen</span>
-              <span class="pp-data-value">4.9 ★</span>
-            </div>
-          </div>
-          <div class="pp-view-all">Browse Catalog →</div>
-        </div>
-      </div>
-    `,
-    
-    talent: () => `
-      <h1 class="pp-section-title">Talent Profile</h1>
-      
-      <div class="pp-cards-grid">
-        <!-- Skills -->
-        <div class="pp-card">
-          <div class="pp-card-header">
-            <span class="pp-card-title">Skills & Competencies</span>
-            <div class="pp-card-actions">
-              <button class="pp-card-action"><i class="bi bi-plus-lg"></i></button>
-            </div>
-          </div>
-          <div class="pp-card-body">
-            <div class="pp-data-row">
-              <span class="pp-data-label">Marketing Strategy</span>
-              <span class="pp-data-value highlight">Expert</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Team Leadership</span>
-              <span class="pp-data-value highlight">Expert</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Data Analysis</span>
-              <span class="pp-data-value">Advanced</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Project Management</span>
-              <span class="pp-data-value">Advanced</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Budget Management</span>
-              <span class="pp-data-value">Intermediate</span>
-            </div>
-          </div>
-          <div class="pp-view-all">Manage Skills →</div>
-        </div>
-        
-        <!-- Experience -->
-        <div class="pp-card">
-          <div class="pp-card-header">
-            <span class="pp-card-title">Experience</span>
-          </div>
-          <div class="pp-card-body">
-            <div class="pp-data-row">
-              <span class="pp-data-label">Total Years</span>
-              <span class="pp-data-value highlight">12 years</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">At Company</span>
-              <span class="pp-data-value">6 years</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">In Role</span>
-              <span class="pp-data-value">3 years</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Industries</span>
-              <span class="pp-data-value">Tech, Finance</span>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Languages -->
-        <div class="pp-card">
-          <div class="pp-card-header">
-            <span class="pp-card-title">Languages</span>
-            <div class="pp-card-actions">
-              <button class="pp-card-action"><i class="bi bi-plus-lg"></i></button>
-            </div>
-          </div>
-          <div class="pp-card-body">
-            <div class="pp-data-row">
-              <span class="pp-data-label">English</span>
-              <span class="pp-data-value highlight">Native</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Spanish</span>
-              <span class="pp-data-value">Fluent</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">French</span>
-              <span class="pp-data-value">Conversational</span>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Mobility -->
-        <div class="pp-card">
-          <div class="pp-card-header">
-            <span class="pp-card-title">Mobility & Preferences</span>
-            <div class="pp-card-actions">
-              <button class="pp-card-action"><i class="bi bi-pencil"></i></button>
-            </div>
-          </div>
-          <div class="pp-card-body">
-            <div class="pp-data-row">
-              <span class="pp-data-label">Willing to Relocate</span>
-              <span class="pp-data-value" style="color: #22c55e;">Yes</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Travel</span>
-              <span class="pp-data-value">Up to 25%</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Preferred Locations</span>
-              <span class="pp-data-value">NYC, LA, London</span>
-            </div>
-            <div class="pp-data-row">
-              <span class="pp-data-label">Remote Work</span>
-              <span class="pp-data-value">Hybrid preferred</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    `
-  };
-
-  // Render the main layout
-  content.innerHTML = `
-    <div class="people-profile">
-      
-      <!-- Top Bar -->
-      <div class="pp-topbar">
-        <div class="pp-topbar-title">People Profile</div>
-        <div class="pp-topbar-actions">
-          <button class="pp-topbar-btn">Public Profile</button>
-          <button class="pp-topbar-btn active">
-            <i class="bi bi-calendar3 me-1"></i>As of Today
-          </button>
-        </div>
-      </div>
-      
-      <!-- Main Layout -->
-      <div class="pp-layout">
-        
-        <!-- Left Sidebar -->
-        <div class="pp-sidebar">
-          
-          <!-- Profile Card -->
-          <div class="pp-profile-card">
-            <div class="pp-cover"></div>
-            <div class="pp-avatar-container">
-              <div class="pp-avatar">${employee.firstName.charAt(0)}${employee.lastName.charAt(0)}</div>
-              <div class="pp-status-badge ooo">
-                <span class="pp-status-dot"></span>
-                ${employee.status} · Back ${employee.returnDate}
-              </div>
-            </div>
-            <div class="pp-profile-info">
-              <h2 class="pp-name">${employee.firstName} ${employee.lastName} <i class="bi bi-linkedin" style="font-size: 0.9rem; color: #0077b5;"></i></h2>
-              <div class="pp-title">${employee.title}</div>
-              <div class="pp-meta">${employee.department} (${employee.employeeId})</div>
-              <div class="pp-direct-reports">
-                <i class="bi bi-people"></i>
-                Direct Reports: ${employee.directReports}
-              </div>
-              <button class="pp-all-actions">
-                <i class="bi bi-grid-3x3-gap"></i>
-                All Actions
-              </button>
-            </div>
-          </div>
-          
-          <!-- Navigation -->
-          <nav class="pp-nav">
-            ${navItems.map(item => `
-              <div class="pp-nav-item ${item.active ? 'active' : ''}" data-section="${item.id}">
-                <i class="bi ${item.icon}"></i>
-                <span>${item.label}</span>
-              </div>
-            `).join('')}
-          </nav>
-          
-        </div>
-        
-        <!-- Main Content -->
-        <div class="pp-content" id="pp-content-area">
-          ${sectionContent.personal()}
-        </div>
-        
-      </div>
-      
-    </div>
-  `;
-
-  // Add navigation click handlers
-  const contentArea = document.getElementById('pp-content-area');
-  content.querySelectorAll('.pp-nav-item').forEach(item => {
-    item.addEventListener('click', () => {
-      // Update active state
-      content.querySelectorAll('.pp-nav-item').forEach(i => i.classList.remove('active'));
-      item.classList.add('active');
-      
-      // Update content
-      const sectionId = item.dataset.section;
-      if (sectionContent[sectionId]) {
-        contentArea.innerHTML = sectionContent[sectionId]();
-      }
-    });
-  });
-}
 
 function renderSeekerHome() {
   const content = document.getElementById('content-area');
@@ -1825,7 +719,43 @@ const mockCareerData = {
     { id: 1, title: 'Manager - Technology Consulting', department: 'Consulting', location: 'Dallas, TX', fitScore: 96, salary: '$140k-180k', reason: 'Natural progression based on performance and leadership skills' },
     { id: 2, title: 'Senior Manager - AI & Data', department: 'Technology', location: 'Austin, TX', fitScore: 89, salary: '$160k-200k', reason: 'Strong ML skills and recent AI project experience' },
     { id: 3, title: 'Director - Cloud Architecture', department: 'Technology', location: 'Remote', fitScore: 85, salary: '$180k-220k', reason: 'AWS expertise and cloud migration leadership' }
-  ]
+  ],
+  publicProfile: {
+    spotlightLabel: 'Spotlight',
+    status: { label: 'Out of Office', backOn: 'Jan 28, 2026' },
+    bio: 'I enjoy meeting new people and finding ways to help them have an uplifting experience. I am passionate, love arts and enjoy spending time with ...',
+    contact: {
+      phone: '(1) 416 6172297',
+      email: 'alex.chen@ey.com',
+      location: 'Dallas, TX'
+    },
+    manager: { name: 'Jerry Choate', title: 'Head of R&D' },
+    org: {
+      company: 'BestRun (10000)',
+      businessUnit: 'Products (PRODS)',
+      division: 'Research & Development (RES_DEV)',
+      department: 'Technology Consulting'
+    },
+    absence: { range: 'January 25 – 27', label: 'Out of Office' },
+    skillHighlights: {
+      left: { label: 'Problem Solving', score: 4 },
+      right: { label: 'Business Processes', score: 4 }
+    },
+    competencies: [
+      { label: 'Attentive Listening', value: 5 },
+      { label: 'Inspiring and Motivating Others', value: 4 },
+      { label: 'Building and Supporting Teams', value: 4 },
+      { label: 'Critical Thinking', value: 3 },
+      { label: 'Displaying Technical Expertise', value: 3 }
+    ],
+    reportingLine: [
+      { name: 'Linda R. Simpson', title: 'CEO' },
+      { name: 'Janelle Boring', title: 'VP Products' },
+      { name: 'Jerry Choate', title: 'Head of R&D' }
+    ],
+    targetRoles: ['CHRO', 'Director of Marketing', 'VP Marketing'],
+    tags: ['Leadership', 'People Ops', 'Coaching', 'Culture']
+  }
 };
 
 async function fetchCareerData() {
@@ -1855,6 +785,7 @@ async function fetchCareerData() {
       feedback: feedback.length > 0 ? feedback : mockCareerData.feedback,
       skills: skills.length > 0 ? skills : mockCareerData.skills,
       recommendations: recommendations.length > 0 ? recommendations : mockCareerData.recommendations,
+      publicProfile: (employee && employee.publicProfile) ? employee.publicProfile : mockCareerData.publicProfile,
       availableTables: tablesRes,
       fromDatabase: true
     };
@@ -2234,245 +1165,361 @@ window.showDatabaseInfo = function() {
   modal.show();
 };
 
-// ============================================================================
-// GAP ANALYSIS MODAL
-// ============================================================================
+function escapeHtml(value) {
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
-function showGapAnalysis(job) {
-  // Define required skills per department/role type
-  const skillRequirements = {
-    'Assurance': {
-      skills: ['Audit', 'Risk Assessment', 'Financial Analysis', 'Compliance', 'Data Analytics', 'Communication'],
-      required: [85, 80, 90, 85, 70, 80]
-    },
-    'Consulting': {
-      skills: ['Problem Solving', 'Client Management', 'Data Analytics', 'Project Management', 'Communication', 'Technical Skills'],
-      required: [90, 85, 80, 85, 90, 75]
-    },
-    'Tax': {
-      skills: ['Tax Law', 'Financial Analysis', 'Compliance', 'Research', 'Communication', 'Technology'],
-      required: [90, 85, 95, 80, 75, 70]
-    },
-    'Strategy': {
-      skills: ['Strategic Thinking', 'Market Analysis', 'Financial Modeling', 'Leadership', 'Communication', 'Problem Solving'],
-      required: [95, 90, 85, 85, 90, 90]
-    },
-    'Internal Functions': {
-      skills: ['Technical Skills', 'Process Management', 'Communication', 'Problem Solving', 'Collaboration', 'Innovation'],
-      required: [80, 75, 85, 80, 85, 70]
-    }
+function getInitials(name) {
+  if (!name) return '';
+  return String(name)
+    .trim()
+    .split(/\s+/)
+    .map(part => part[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+}
+
+function clampRating(value) {
+  const num = Number(value);
+  if (Number.isNaN(num)) return 0;
+  return Math.max(1, Math.min(5, Math.round(num)));
+}
+
+function buildPublicProfileData(data) {
+  const fallback = (data && data.publicProfile) ? data.publicProfile : (mockCareerData.publicProfile || {});
+  const employee = (data && data.employee) ? data.employee : {};
+  const skills = Array.isArray(data && data.skills) ? data.skills : [];
+  const recommendations = Array.isArray(data && data.recommendations) ? data.recommendations : [];
+
+  const name = employee.name || fallback.name || 'Employee';
+  const title = employee.title || fallback.title || '';
+  const department = employee.department || (fallback.org && fallback.org.department) || '';
+  const location = employee.location || (fallback.contact && fallback.contact.location) || '';
+
+  const contact = {
+    phone: employee.phone || (fallback.contact && fallback.contact.phone) || '',
+    email: employee.email || (fallback.contact && fallback.contact.email) || '',
+    location
   };
 
-  // Get requirements for this job's department
-  const reqs = skillRequirements[job.department] || skillRequirements['Consulting'];
-  
-  // Simulate user's current skills (in real app, this would come from user profile)
-  const userSkills = reqs.required.map(req => {
-    const variance = Math.floor(Math.random() * 30) - 10;
-    return Math.min(100, Math.max(40, req + variance));
-  });
+  const org = {
+    company: (fallback.org && fallback.org.company) || '',
+    businessUnit: (fallback.org && fallback.org.businessUnit) || '',
+    division: (fallback.org && fallback.org.division) || '',
+    department
+  };
 
-  // Calculate gaps
-  const gaps = reqs.skills.map((skill, i) => ({
-    skill,
-    required: reqs.required[i],
-    current: userSkills[i],
-    gap: reqs.required[i] - userSkills[i]
-  }));
+  const skillHighlights = (() => {
+    const sorted = skills.slice().sort((a, b) => (b.level || 0) - (a.level || 0));
+    const first = sorted[0];
+    const second = sorted[1];
+    if (first && second) {
+      return {
+        left: { label: first.name, score: clampRating((first.level || 0) / 20) },
+        right: { label: second.name, score: clampRating((second.level || 0) / 20) }
+      };
+    }
+    return fallback.skillHighlights || {
+      left: { label: 'Problem Solving', score: 4 },
+      right: { label: 'Business Processes', score: 4 }
+    };
+  })();
 
-  const skillGaps = gaps.filter(g => g.gap > 0).sort((a, b) => b.gap - a.gap);
-  const strengths = gaps.filter(g => g.gap <= 0).sort((a, b) => a.gap - b.gap);
-  
-  // Determine score class
-  const scoreClass = job.fitScore >= 90 ? 'score-high' : job.fitScore >= 75 ? 'score-mid' : 'score-low';
-  
-  // Current timestamp
-  const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
+  const targetRoles = recommendations.length
+    ? recommendations.map(r => r.title).slice(0, 3)
+    : (fallback.targetRoles || []);
+
+  const tags = (() => {
+    const tagCandidates = skills.filter(s => s.verified).map(s => s.name);
+    const unique = Array.from(new Set(tagCandidates));
+    return unique.length ? unique.slice(0, 4) : (fallback.tags || []);
+  })();
+
+  return {
+    spotlightLabel: fallback.spotlightLabel || 'Spotlight',
+    status: fallback.status || { label: 'Available', backOn: '' },
+    name,
+    title,
+    department,
+    location,
+    contact,
+    bio: fallback.bio || '',
+    manager: fallback.manager || { name: '', title: '' },
+    org,
+    absence: fallback.absence || { range: '', label: '' },
+    skillHighlights,
+    competencies: fallback.competencies || [],
+    reportingLine: fallback.reportingLine || [],
+    targetRoles,
+    tags,
+    timeLabel: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+  };
+}
+
+// Public profile modal (matches site theme + styles)
+window.showPublicProfileModal = async function() {
+  const data = await fetchCareerData();
+  const profile = buildPublicProfileData(data);
+  const statusText = profile.status.backOn
+    ? `${profile.status.label} · Back on ${profile.status.backOn}`
+    : profile.status.label;
+
+  const contactRows = [
+    profile.contact.phone ? `
+      <div class="d-flex align-items-center mb-3">
+        <i class="bi bi-telephone me-2 text-warning"></i>
+        <span>${escapeHtml(profile.contact.phone)}</span>
+      </div>
+    ` : '',
+    profile.contact.email ? `
+      <div class="d-flex align-items-center mb-3">
+        <i class="bi bi-envelope me-2 text-warning"></i>
+        <span>${escapeHtml(profile.contact.email)}</span>
+      </div>
+    ` : '',
+    profile.contact.location ? `
+      <div class="d-flex align-items-center">
+        <i class="bi bi-geo-alt me-2 text-warning"></i>
+        <span>${escapeHtml(profile.contact.location)}</span>
+      </div>
+    ` : ''
+  ].filter(Boolean).join('');
+
+  const orgRows = [
+    profile.org.company ? `<div>Company: ${escapeHtml(profile.org.company)}</div>` : '',
+    profile.org.businessUnit ? `<div>Business Unit: ${escapeHtml(profile.org.businessUnit)}</div>` : '',
+    profile.org.division ? `<div>Division: ${escapeHtml(profile.org.division)}</div>` : '',
+    profile.org.department ? `<div>Department: ${escapeHtml(profile.org.department)}</div>` : ''
+  ].filter(Boolean).join('');
 
   const modalHtml = `
-    <div class="modal fade" id="gapAnalysisModal" tabindex="-1">
-      <div class="modal-dialog modal-dialog-centered">
+    <div class="modal fade public-profile-modal" id="publicProfileModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
-          
-          <!-- Header -->
-          <div class="gap-modal-header">
-            <div>
-              <div class="system-tag">Skill Analysis System</div>
-              <h2 class="job-title">${job.title}</h2>
+          <div class="modal-header border-bottom">
+            <div class="d-flex align-items-center gap-2">
+              <span class="badge bg-primary text-dark">${escapeHtml(profile.spotlightLabel)}</span>
+              <h5 class="modal-title mb-0">Public Profile</h5>
             </div>
-            <button class="close-btn" data-bs-dismiss="modal">
-              <i class="bi bi-x"></i>
-            </button>
+            <div class="d-flex align-items-center gap-2">
+              <button class="btn btn-outline-primary btn-sm">Full Profile</button>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
           </div>
-          
-          <!-- Body -->
-          <div class="gap-modal-body">
-            
-            <!-- Left Panel - Chart -->
-            <div class="gap-chart-panel">
-              <div class="chart-header">
-                <div class="legend">
-                  <div class="legend-item">
-                    <span class="legend-dot required"></span>
-                    Required
+          <div class="modal-body p-0">
+            <div class="profile-cover"></div>
+            <div class="p-4 pt-0">
+              <div class="d-flex align-items-end gap-3 profile-hero">
+                <div class="profile-avatar bg-primary text-dark">${escapeHtml(getInitials(profile.name))}</div>
+                <div class="flex-grow-1">
+                  <div class="d-flex flex-wrap align-items-center gap-2">
+                    <h4 class="mb-0">${escapeHtml(profile.name)}</h4>
+                    <button class="btn btn-sm btn-outline-primary px-2 py-0">
+                      <i class="bi bi-pencil"></i>
+                    </button>
                   </div>
-                  <div class="legend-item">
-                    <span class="legend-dot current"></span>
-                    Current
-                  </div>
-                </div>
-              </div>
-              <div class="gap-chart-canvas">
-                <canvas id="gapRadarChart"></canvas>
-              </div>
-            </div>
-            
-            <!-- Divider -->
-            <div class="gap-divider"></div>
-            
-            <!-- Right Panel - Data -->
-            <div class="gap-data-panel">
-              
-              <!-- Fit Score -->
-              <div class="fit-score-block">
-                <div class="fit-score-label">Compatibility Index</div>
-                <div class="fit-score-value ${scoreClass}">${job.fitScore}%</div>
-              </div>
-              
-              ${skillGaps.length > 0 ? `
-              <!-- Gaps -->
-              <div class="gap-section">
-                <div class="gap-section-header">
-                  <i class="bi bi-arrow-up-right"></i>
-                  Development Areas
-                </div>
-                ${skillGaps.slice(0, 3).map(g => `
-                  <div class="skill-row">
-                    <span class="skill-name">${g.skill}</span>
-                    <div class="skill-values">
-                      <span class="skill-current">${g.current}%</span>
-                      <span class="skill-arrow">→</span>
-                      <span class="skill-required">${g.required}%</span>
+                  <div class="profile-info-card mt-2">
+                    <div class="small text-muted">
+                      ${escapeHtml(profile.title)}${profile.department ? ` · ${escapeHtml(profile.department)}` : ''}
+                    </div>
+                    <div class="d-flex flex-wrap gap-3 small text-muted mt-1">
+                      ${statusText ? `<span><i class="bi bi-clock me-1"></i>${escapeHtml(statusText)}</span>` : ''}
+                      ${profile.location ? `<span><i class="bi bi-geo-alt me-1"></i>${escapeHtml(profile.location)}</span>` : ''}
                     </div>
                   </div>
-                `).join('')}
-              </div>
-              ` : ''}
-              
-              ${strengths.length > 0 ? `
-              <!-- Strengths -->
-              <div class="gap-section">
-                <div class="gap-section-header success">
-                  <i class="bi bi-check2"></i>
-                  Exceeds Requirements
                 </div>
-                ${strengths.slice(0, 3).map(g => `
-                  <div class="skill-row strength">
-                    <span class="skill-name">${g.skill}</span>
-                    <div class="skill-values">
-                      <span class="skill-current">${g.current}%</span>
-                      <span class="skill-check"><i class="bi bi-check2"></i></span>
+                <div class="text-muted small d-none d-md-block">
+                  <i class="bi bi-clock me-1"></i>${escapeHtml(profile.timeLabel)} (Local Time)
+                </div>
+              </div>
+
+              <div class="row g-4 mt-3">
+                <!-- Left Sidebar -->
+                <div class="col-lg-4">
+                  <div class="card mb-4">
+                    <div class="card-header">
+                      <i class="bi bi-person-lines-fill me-2"></i>Contact
+                    </div>
+                    <div class="card-body">
+                      ${contactRows || '<span class="text-muted small">No contact details available.</span>'}
                     </div>
                   </div>
-                `).join('')}
-              </div>
-              ` : ''}
-              
-              <!-- Recommendation -->
-              <div class="recommendation-block">
-                <div class="recommendation-label">System Recommendation</div>
-                <div class="recommendation-text">
-                  ${skillGaps.length > 0 
-                    ? `Prioritize <strong>${skillGaps[0].skill}</strong> development to maximize role compatibility. Estimated improvement potential: +${Math.min(skillGaps[0].gap + 3, 15)}% fit score.`
-                    : 'Profile exceeds all role requirements. Strong candidate for immediate consideration.'}
+
+                  <div class="card mb-4">
+                    <div class="card-header">
+                      <i class="bi bi-chat-left-text me-2"></i>Bio
+                    </div>
+                    <div class="card-body">
+                      <p class="text-muted mb-0">
+                        ${escapeHtml(profile.bio)}
+                        <a href="#" class="text-warning text-decoration-none">Show More</a>
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                      <span><i class="bi bi-people me-2"></i>Direct Manager</span>
+                      <i class="bi bi-diagram-3 text-warning"></i>
+                    </div>
+                    <div class="card-body d-flex align-items-center gap-3">
+                      <div class="profile-avatar-sm bg-primary text-dark">${escapeHtml(getInitials(profile.manager.name))}</div>
+                      <div>
+                        <div class="fw-semibold">${escapeHtml(profile.manager.name)}</div>
+                        <div class="text-muted small">${escapeHtml(profile.manager.title)}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="col-lg-8">
+                  <div class="row g-4">
+                    <div class="col-md-6">
+                      <div class="card h-100">
+                        <div class="card-header">
+                          <i class="bi bi-bullseye me-2"></i>Skills
+                        </div>
+                        <div class="card-body d-flex align-items-center justify-content-center">
+                          <div class="text-center">
+                            <div class="text-muted small mb-2">
+                              ${escapeHtml(profile.skillHighlights.left.label)} (${profile.skillHighlights.left.score}/5)
+                            </div>
+                            <div class="skill-ring">
+                              <div class="skill-ring-inner"></div>
+                            </div>
+                            <div class="text-muted small mt-2">
+                              ${escapeHtml(profile.skillHighlights.right.label)} (${profile.skillHighlights.right.score}/5)
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-6">
+                      <div class="card h-100">
+                        <div class="card-header">
+                          <i class="bi bi-graph-up me-2"></i>Competencies
+                        </div>
+                        <div class="card-body">
+                          ${profile.competencies.map(item => `
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                              <span class="small">${escapeHtml(item.label)}</span>
+                              <div class="d-flex align-items-center gap-2">
+                                <span class="small text-muted">${item.value}</span>
+                                <div class="progress competency-bar">
+                                  <div class="progress-bar bg-primary" style="width: ${item.value * 20}%;"></div>
+                                </div>
+                              </div>
+                            </div>
+                          `).join('')}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-6">
+                      <div class="card h-100">
+                        <div class="card-header">
+                          <i class="bi bi-building me-2"></i>Organization Information
+                        </div>
+                        <div class="card-body small text-muted">
+                          ${orgRows || '<div>No organization details available.</div>'}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-6">
+                      <div class="card h-100">
+                        <div class="card-header">
+                          <i class="bi bi-calendar2-week me-2"></i>Upcoming Absence
+                        </div>
+                        <div class="card-body d-flex align-items-center justify-content-between">
+                          <div>
+                            <div class="fw-semibold">${escapeHtml(profile.absence.range)}</div>
+                            <div class="text-muted small">${escapeHtml(profile.absence.label)}</div>
+                          </div>
+                          <div class="absence-icon bg-primary bg-opacity-25 text-warning">
+                            <i class="bi bi-door-open"></i>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-12">
+                      <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                          <span><i class="bi bi-diagram-2 me-2"></i>Reporting Line</span>
+                          <i class="bi bi-diagram-3 text-warning"></i>
+                        </div>
+                        <div class="card-body">
+                          <div class="row g-3">
+                            ${profile.reportingLine.map(entry => `
+                              <div class="col-md-4 d-flex align-items-center gap-2">
+                                <div class="profile-avatar-sm bg-primary text-dark">${escapeHtml(getInitials(entry.name))}</div>
+                                <div>
+                                  <div class="fw-semibold small">${escapeHtml(entry.name)}</div>
+                                  <div class="text-muted small">${escapeHtml(entry.title)}</div>
+                                </div>
+                              </div>
+                            `).join('')}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-6">
+                      <div class="card h-100">
+                        <div class="card-header">
+                          <i class="bi bi-briefcase me-2"></i>Target Roles
+                        </div>
+                        <div class="card-body">
+                          <div class="d-flex flex-wrap gap-2">
+                            ${profile.targetRoles.map(role => `
+                              <span class="badge bg-primary text-dark">${escapeHtml(role)}</span>
+                            `).join('')}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-6">
+                      <div class="card h-100">
+                        <div class="card-header">
+                          <i class="bi bi-tags me-2"></i>Tags
+                        </div>
+                        <div class="card-body">
+                          <div class="d-flex flex-wrap gap-2">
+                            ${profile.tags.map(tag => `
+                              <span class="badge bg-secondary">${escapeHtml(tag)}</span>
+                            `).join('')}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-              
             </div>
           </div>
-          
-          <!-- Footer -->
-          <div class="gap-modal-footer">
-            <div class="timestamp">Generated: ${timestamp}</div>
-            <div class="actions">
-              <button class="gap-btn" data-bs-dismiss="modal">Dismiss</button>
-              <button class="gap-btn gap-btn-primary" onclick="navigate('seeker-learning'); bootstrap.Modal.getInstance(document.getElementById('gapAnalysisModal')).hide();">
-                View Learning Path
-              </button>
-            </div>
-          </div>
-          
         </div>
       </div>
     </div>
   `;
 
-  // Remove existing modal if any
-  const existing = document.getElementById('gapAnalysisModal');
+  const existing = document.getElementById('publicProfileModal');
   if (existing) existing.remove();
-  
-  // Add and show modal
-  document.body.insertAdjacentHTML('beforeend', modalHtml);
-  const modal = new bootstrap.Modal(document.getElementById('gapAnalysisModal'));
-  modal.show();
 
-  // Create radar chart after modal is shown
-  document.getElementById('gapAnalysisModal').addEventListener('shown.bs.modal', () => {
-    createChart('gapRadarChart', {
-      type: 'radar',
-      data: {
-        labels: reqs.skills,
-        datasets: [
-          {
-            label: 'Required',
-            data: reqs.required,
-            borderColor: '#FFD700',
-            backgroundColor: 'rgba(255, 215, 0, 0.08)',
-            borderWidth: 2,
-            pointBackgroundColor: '#FFD700',
-            pointBorderColor: '#FFD700',
-            pointRadius: 4
-          },
-          {
-            label: 'Your Skills',
-            data: userSkills,
-            borderColor: '#22c55e',
-            backgroundColor: 'rgba(34, 197, 94, 0.08)',
-            borderWidth: 2,
-            pointBackgroundColor: '#22c55e',
-            pointBorderColor: '#22c55e',
-            pointRadius: 4
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        scales: {
-          r: {
-            beginAtZero: true,
-            max: 100,
-            ticks: {
-              stepSize: 25,
-              color: '#444',
-              backdropColor: 'transparent',
-              font: { family: "'JetBrains Mono', monospace", size: 9 }
-            },
-            grid: { color: 'rgba(255,255,255,0.06)' },
-            angleLines: { color: 'rgba(255,255,255,0.06)' },
-            pointLabels: { 
-              color: '#888',
-              font: { family: "'Space Grotesk', sans-serif", size: 11, weight: 500 }
-            }
-          }
-        },
-        plugins: {
-          legend: { display: false }
-        }
-      }
-    });
-  });
-}
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+  const modal = new bootstrap.Modal(document.getElementById('publicProfileModal'));
+  modal.show();
+};
 
 function renderSeekerJobs() {
   const content = document.getElementById('content-area');
@@ -2510,69 +1557,58 @@ function renderSeekerJobs() {
   };
 
   content.innerHTML = `
-    <div class="job-board">
-      
-      <!-- Header -->
-      <div class="jb-header">
-        <div class="jb-title-block">
-          <div class="jb-system-label">Career Opportunities</div>
-          <h1 class="jb-title">Job Board</h1>
-        </div>
-        <div class="jb-count-block">
-          <div class="jb-count-number" id="jobCountDisplay">0</div>
-          <div class="jb-count-label">Available Positions</div>
-        </div>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h4 class="mb-0">Job Board</h4>
+      <div class="d-flex align-items-baseline">
+        <span id="jobCountDisplay" class="h2 fw-bold text-warning mb-0 me-2">0</span>
+        <span class="text-muted">available positions</span>
       </div>
-      
-      <!-- Filter Bar -->
-      <div class="jb-filter-bar">
-        <div class="jb-filter-group">
-          <span class="jb-filter-label">Department</span>
-          <select class="jb-select" id="deptFilter">
-            <option value="">All Departments</option>
-            <option value="Assurance">Assurance</option>
-            <option value="Consulting">Consulting</option>
-            <option value="Strategy">Strategy</option>
-            <option value="Tax">Tax</option>
-            <option value="Internal Functions">Internal Functions</option>
-          </select>
-        </div>
-        <div class="jb-filter-group">
-          <span class="jb-filter-label">Level</span>
-          <select class="jb-select" id="levelFilter">
-            <option value="">All Levels</option>
-            <option value="Intern">Intern</option>
-            <option value="Staff / Associate">Staff / Associate</option>
-            <option value="Senior Consultant / Senior Associate">Senior Consultant</option>
-            <option value="Manager">Manager</option>
-            <option value="Senior Manager">Senior Manager</option>
-            <option value="Director">Director</option>
-            <option value="Partner / Principal">Partner / Principal</option>
-          </select>
-        </div>
-        <div class="jb-filter-group">
-          <span class="jb-filter-label">Search</span>
-          <div class="jb-search-wrapper">
-            <i class="bi bi-search"></i>
-            <input type="text" class="jb-search" id="jobSearch" placeholder="Search by title, location, or company...">
-          </div>
-        </div>
-        <label class="jb-toggle">
-          <span class="jb-toggle-label">Recommended<br>Only (&gt;85%)</span>
-          <div class="jb-toggle-switch">
-            <input type="checkbox" id="recommendedFilter">
-            <span class="jb-toggle-slider"></span>
-          </div>
-        </label>
-      </div>
-
-      <!-- Active Filters -->
-      <div class="jb-active-filters" id="activeFilters"></div>
-
-      <!-- Results -->
-      <div class="jb-results" id="jobsContainer"></div>
-      
     </div>
+    
+    <!-- Filters -->
+    <div class="card mb-3">
+      <div class="card-body py-3">
+        <div class="row g-3 align-items-center">
+          <div class="col-md-3">
+            <select class="form-select form-select-sm" id="deptFilter">
+              <option value="" selected>Add Department...</option>
+              <option value="Assurance">Assurance</option>
+              <option value="Consulting">Consulting</option>
+              <option value="Strategy">Strategy</option>
+              <option value="Tax">Tax</option>
+              <option value="Internal Functions">Internal Functions</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <select class="form-select form-select-sm" id="levelFilter">
+              <option value="" selected>Add Level...</option>
+              <option value="Intern">Intern</option>
+              <option value="Staff / Associate">Staff / Associate</option>
+              <option value="Senior Consultant / Senior Associate">Senior Consultant / Senior Associate</option>
+              <option value="Manager">Manager</option>
+              <option value="Senior Manager">Senior Manager</option>
+              <option value="Director">Director</option>
+              <option value="Partner / Principal">Partner / Principal</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <input type="text" class="form-control form-control-sm" id="jobSearch" placeholder="Search title, location...">
+          </div>
+          <div class="col-md-3">
+            <div class="form-check form-switch mb-0">
+              <input class="form-check-input" type="checkbox" id="recommendedFilter">
+              <label class="form-check-label small" for="recommendedFilter">Recommended Only (>85% Fit)</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Filters Container -->
+    <div id="activeFilters" class="d-flex flex-wrap gap-2 mb-4" style="min-height: 20px;"></div>
+
+    <!-- Results Area -->
+    <div id="jobsContainer" class="row g-3"></div>
   `;
 
   // Filter and Render Logic
@@ -2602,33 +1638,33 @@ function renderSeekerJobs() {
     const filtersContainer = document.getElementById('activeFilters');
     filtersContainer.innerHTML = '';
 
-    const createTag = (text, removeCallback, isRecommended = false) => {
+    const createTag = (text, removeCallback, colorClass = 'bg-secondary') => {
         const tag = document.createElement('span');
-        tag.className = `jb-filter-tag ${isRecommended ? 'recommended' : ''}`;
+        tag.className = `badge ${colorClass} d-flex align-items-center p-2`;
         tag.innerHTML = `
-            <span>${text}</span>
-            <i class="bi bi-x"></i>
+            <span class="me-2">${text}</span>
+            <i class="bi bi-x-lg" style="cursor: pointer;"></i>
         `;
         tag.querySelector('i').addEventListener('click', removeCallback);
         filtersContainer.appendChild(tag);
     };
 
     activeFilters.departments.forEach(dept => {
-        createTag(`DEPT: ${dept}`, () => {
+        createTag(`Dept: ${dept}`, () => {
             activeFilters.departments.delete(dept);
             renderList();
         });
     });
 
     activeFilters.levels.forEach(lvl => {
-        createTag(`LEVEL: ${lvl}`, () => {
+        createTag(`Level: ${lvl}`, () => {
             activeFilters.levels.delete(lvl);
             renderList();
         });
     });
 
     if (activeFilters.search) {
-        createTag(`SEARCH: "${activeFilters.search}"`, () => {
+        createTag(`Search: "${activeFilters.search}"`, () => {
             activeFilters.search = '';
             document.getElementById('jobSearch').value = '';
             renderList();
@@ -2636,11 +1672,11 @@ function renderSeekerJobs() {
     }
 
     if (activeFilters.recommended) {
-        createTag('RECOMMENDED ONLY', () => {
+        createTag('Recommended Only', () => {
             activeFilters.recommended = false;
             document.getElementById('recommendedFilter').checked = false;
             renderList();
-        }, true);
+        }, 'bg-success');
     }
 
     // 3. Render Job Cards
@@ -2648,49 +1684,45 @@ function renderSeekerJobs() {
     
     if (filtered.length === 0) {
       container.innerHTML = `
-        <div class="jb-empty">
-          <i class="bi bi-search"></i>
-          <p>No positions match your current filters</p>
+        <div class="col-12 text-center py-5">
+          <i class="bi bi-emoji-frown fs-1 text-muted"></i>
+          <p class="text-muted mt-2">No jobs found matching your filters.</p>
         </div>
       `;
       return;
     }
 
-    container.innerHTML = filtered.map((job, index) => `
-      <div class="jb-card">
-        <div class="jb-card-info">
-          <h3 class="jb-card-title">
-            ${job.title}
-            <span class="jb-card-dept">${job.department}</span>
-          </h3>
-          <div class="jb-card-meta">
-            <span><i class="bi bi-building"></i>${job.company}</span>
-            <span><i class="bi bi-geo-alt"></i>${job.location}</span>
-            <span><i class="bi bi-currency-dollar"></i>${job.salary}</span>
+    container.innerHTML = filtered.map(job => `
+      <div class="col-12">
+        <div class="card">
+          <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+              <div class="d-flex align-items-center mb-1">
+                <h5 class="card-title mb-0 me-2">${job.title}</h5>
+                <span class="badge bg-light text-dark border me-1">${job.department}</span>
+              </div>
+              <p class="card-text text-muted mb-0">
+                <i class="bi bi-building me-1"></i>${job.company} · 
+                <i class="bi bi-geo-alt me-1"></i>${job.location} · 
+                <i class="bi bi-cash me-1"></i>${job.salary}
+              </p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+              <div class="text-center">
+                <div class="fs-4 fw-bold ${job.fitScore >= 90 ? 'text-success' : job.fitScore >= 80 ? 'text-warning' : 'text-secondary'}">${job.fitScore}%</div>
+                <small class="text-muted">AI Fit Score</small>
+              </div>
+              <button class="btn btn-warning">
+                <i class="bi bi-bar-chart me-1"></i>Gap Analysis
+              </button>
+              <button class="btn btn-primary">
+                Apply
+              </button>
+            </div>
           </div>
-        </div>
-        <div class="jb-fit-score">
-          <div class="jb-fit-value ${job.fitScore >= 90 ? 'high' : job.fitScore >= 80 ? 'mid' : 'low'}">${job.fitScore}%</div>
-          <div class="jb-fit-label">Fit Score</div>
-        </div>
-        <div class="jb-card-actions">
-          <button class="modern-btn modern-btn-outline" data-job-index="${index}">
-            <i class="bi bi-bar-chart-line"></i>Gap Analysis
-          </button>
-          <button class="modern-btn modern-btn-filled">
-            <i class="bi bi-send"></i>Apply
-          </button>
         </div>
       </div>
     `).join('');
-
-    // Attach click handlers for Gap Analysis buttons
-    container.querySelectorAll('.modern-btn-outline').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const jobIndex = parseInt(btn.dataset.jobIndex);
-        showGapAnalysis(filtered[jobIndex]);
-      });
-    });
   };
 
   // Attach Listeners
@@ -2735,138 +1767,99 @@ function renderSeekerJobs() {
 function renderSeekerLearning() {
   const content = document.getElementById('content-area');
   content.innerHTML = `
-    <div class="learning-section">
-      <h4 class="page-title">Learning Paths</h4>
-      <div class="row g-4">
-        <!-- Course Progress -->
-        <div class="col-lg-7">
-          <div class="learning-card">
-            <div class="learning-card-header">
-              <i class="bi bi-mortarboard-fill"></i>
-              <span>Current Courses</span>
+    <h4 class="mb-4">Learning Paths</h4>
+    <div class="row g-4">
+      <!-- Course Progress -->
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <i class="bi bi-mortarboard me-2"></i>Current Courses
+          </div>
+          <div class="card-body">
+            <div class="mb-4">
+              <div class="d-flex justify-content-between mb-1">
+                <strong>TypeScript Masterclass</strong>
+                <span>75%</span>
+              </div>
+              <div class="progress" style="height: 20px;">
+                <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" style="width: 75%;">75%</div>
+              </div>
+              <small class="text-muted">12 of 16 modules completed</small>
             </div>
-            <div class="learning-card-body">
-              <!-- TypeScript Masterclass -->
-              <div class="course-card">
-                <div class="course-header">
-                  <h5 class="course-title">TypeScript Masterclass</h5>
-                  <span class="course-percentage">75%</span>
-                </div>
-                <div class="modern-progress">
-                  <div class="modern-progress-bar progress-green" style="width: 75%;"></div>
-                </div>
-                <div class="course-meta">
-                  <span class="modules-info">12 of 16 modules completed</span>
-                  <button class="continue-btn">Continue</button>
-                </div>
+            <div class="mb-4">
+              <div class="d-flex justify-content-between mb-1">
+                <strong>AWS Solutions Architect</strong>
+                <span>30%</span>
               </div>
-
-              <!-- AWS Solutions Architect -->
-              <div class="course-card">
-                <div class="course-header">
-                  <h5 class="course-title">AWS Solutions Architect</h5>
-                  <span class="course-percentage">30%</span>
-                </div>
-                <div class="modern-progress">
-                  <div class="modern-progress-bar progress-blue" style="width: 30%;"></div>
-                </div>
-                <div class="course-meta">
-                  <span class="modules-info">6 of 20 modules completed</span>
-                  <button class="continue-btn">Continue</button>
-                </div>
+              <div class="progress" style="height: 20px;">
+                <div class="progress-bar bg-info progress-bar-striped progress-bar-animated" style="width: 30%;">30%</div>
               </div>
-
-              <!-- System Design Fundamentals -->
-              <div class="course-card">
-                <div class="course-header">
-                  <h5 class="course-title">System Design Fundamentals</h5>
-                  <span class="course-percentage">45%</span>
-                </div>
-                <div class="modern-progress">
-                  <div class="modern-progress-bar progress-yellow" style="width: 45%;"></div>
-                </div>
-                <div class="course-meta">
-                  <span class="modules-info">9 of 20 modules completed</span>
-                  <button class="continue-btn">Continue</button>
-                </div>
+              <small class="text-muted">6 of 20 modules completed</small>
+            </div>
+            <div class="mb-4">
+              <div class="d-flex justify-content-between mb-1">
+                <strong>System Design Fundamentals</strong>
+                <span>45%</span>
               </div>
-
-              <!-- GraphQL Complete Guide -->
-              <div class="course-card">
-                <div class="course-header">
-                  <h5 class="course-title">GraphQL Complete Guide</h5>
-                  <span class="course-percentage">60%</span>
-                </div>
-                <div class="modern-progress">
-                  <div class="modern-progress-bar progress-purple" style="width: 60%;"></div>
-                </div>
-                <div class="course-meta">
-                  <span class="modules-info">9 of 15 modules completed</span>
-                  <button class="continue-btn">Continue</button>
-                </div>
+              <div class="progress" style="height: 20px;">
+                <div class="progress-bar bg-warning progress-bar-striped progress-bar-animated" style="width: 45%;">45%</div>
               </div>
+              <small class="text-muted">9 of 20 modules completed</small>
+            </div>
+            <div class="mb-2">
+              <div class="d-flex justify-content-between mb-1">
+                <strong>GraphQL Complete Guide</strong>
+                <span>60%</span>
+              </div>
+              <div class="progress" style="height: 20px;">
+                <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated" style="width: 60%;">60%</div>
+              </div>
+              <small class="text-muted">9 of 15 modules completed</small>
             </div>
           </div>
         </div>
-        
-        <!-- Learning Preferences -->
-        <div class="col-lg-5">
-          <div class="learning-card">
-            <div class="learning-card-header">
-              <i class="bi bi-sliders"></i>
-              <span>Learning Preferences</span>
+      </div>
+      
+      <!-- Learning Settings -->
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <i class="bi bi-gear me-2"></i>Learning Preferences
+          </div>
+          <div class="card-body">
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" id="dailyReminders" checked>
+              <label class="form-check-label" for="dailyReminders">Daily Learning Reminders</label>
             </div>
-            <div class="learning-card-body">
-              <div class="modern-toggle">
-                <span class="modern-toggle-label">Daily Learning Reminders</span>
-                <label class="modern-toggle-switch">
-                  <input type="checkbox" checked>
-                  <span class="modern-toggle-slider"></span>
-                </label>
-              </div>
-              
-              <div class="modern-toggle">
-                <span class="modern-toggle-label">Weekly Progress Reports</span>
-                <label class="modern-toggle-switch">
-                  <input type="checkbox" checked>
-                  <span class="modern-toggle-slider"></span>
-                </label>
-              </div>
-              
-              <div class="modern-toggle">
-                <span class="modern-toggle-label">Auto-enroll in Recommended Courses</span>
-                <label class="modern-toggle-switch">
-                  <input type="checkbox">
-                  <span class="modern-toggle-slider"></span>
-                </label>
-              </div>
-              
-              <div class="modern-toggle">
-                <span class="modern-toggle-label">Peer Learning Groups</span>
-                <label class="modern-toggle-switch">
-                  <input type="checkbox" checked>
-                  <span class="modern-toggle-slider"></span>
-                </label>
-              </div>
-
-              <div class="modern-select-group">
-                <label>Daily Learning Goal</label>
-                <select class="modern-select">
-                  <option>15 minutes</option>
-                  <option selected>30 minutes</option>
-                  <option>1 hour</option>
-                  <option>2 hours</option>
-                </select>
-              </div>
-
-              <div class="modern-select-group">
-                <label>Preferred Learning Time</label>
-                <select class="modern-select">
-                  <option>Morning (6am - 12pm)</option>
-                  <option selected>Afternoon (12pm - 6pm)</option>
-                  <option>Evening (6pm - 12am)</option>
-                </select>
-              </div>
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" id="weeklyReports" checked>
+              <label class="form-check-label" for="weeklyReports">Weekly Progress Reports</label>
+            </div>
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" id="autoEnroll">
+              <label class="form-check-label" for="autoEnroll">Auto-enroll in Recommended Courses</label>
+            </div>
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" id="peerLearning" checked>
+              <label class="form-check-label" for="peerLearning">Peer Learning Groups</label>
+            </div>
+            <hr>
+            <div class="mb-3">
+              <label class="form-label">Daily Learning Goal</label>
+              <select class="form-select">
+                <option>15 minutes</option>
+                <option selected>30 minutes</option>
+                <option>1 hour</option>
+                <option>2 hours</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Preferred Learning Time</label>
+              <select class="form-select">
+                <option>Morning (6am - 12pm)</option>
+                <option selected>Afternoon (12pm - 6pm)</option>
+                <option>Evening (6pm - 12am)</option>
+              </select>
             </div>
           </div>
         </div>
