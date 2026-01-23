@@ -1,0 +1,16 @@
+{
+  "name": "talentflow-server",
+  "version": "1.0.0",
+  "description": "TalentFlow API Server",
+  "main": "index.js",
+  "scripts": {
+    "start": "bun run bun_server.js",
+    "dev": "bun --watch bun_server.js",
+    "start:node": "node index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "mysql2": "^3.6.5"
+  }
+}

@@ -16,6 +16,7 @@ const navData = {
   seeker: [
     { name: 'Home', icon: 'bi-house-door', id: 'seeker-home' },
     { name: 'My Career', icon: 'bi-person-badge', id: 'seeker-profile' },
+    { name: 'Career History', icon: 'bi-clock-history', id: 'seeker-career' },
     { name: 'Learning Paths', icon: 'bi-book', id: 'seeker-learning' },
     { name: 'Job Board', icon: 'bi-briefcase', id: 'seeker-jobs' }
   ],
@@ -209,7 +210,7 @@ function renderShell(role) {
         <span>Alex Chen</span>
       </a>
       <ul class="dropdown-menu dropdown-menu-end animate-slide">
-        <li><a class="dropdown-item" href="#">Profile</a></li>
+        <li><a class="dropdown-item" href="#" onclick="showPublicProfileModal(); return false;">Public Profile</a></li>
         <li><a class="dropdown-item" href="#" onclick="navigate('settings'); return false;">Settings</a></li>
         <li><hr class="dropdown-divider"></li>
         <li><a class="dropdown-item" href="#">Logout</a></li>
@@ -278,6 +279,7 @@ function navigate(routeId) {
     // Job Seeker
     'seeker-home': renderSeekerHome,
     'seeker-profile': renderSeekerProfile,
+    'seeker-career': renderCareer,
     'seeker-learning': renderSeekerLearning,
     'seeker-jobs': renderSeekerJobs,
     // Recruiter
@@ -671,6 +673,853 @@ function renderSeekerProfile() {
     }
   });
 }
+
+// ============================================================================
+// CAREER HISTORY PAGE (Database Connected)
+// ============================================================================
+
+const API_BASE = 'http://localhost:3000/api';
+
+// Mock data fallback when API is unavailable
+const mockCareerData = {
+  employee: {
+    id: 1,
+    name: 'Alex Chen',
+    title: 'Senior Software Engineer',
+    department: 'Technology Consulting',
+    startDate: '2021-03-15',
+    yearsAtCompany: 4.8,
+    email: 'alex.chen@ey.com',
+    location: 'Dallas, TX'
+  },
+  projects: [
+    { id: 1, name: 'Cloud Migration Initiative', role: 'Tech Lead', status: 'Completed', startDate: '2024-01-15', endDate: '2024-08-30', client: 'Fortune 500 Bank', rating: 4.8, description: 'Led a team of 8 engineers to migrate legacy systems to AWS' },
+    { id: 2, name: 'AI-Powered Analytics Platform', role: 'Senior Developer', status: 'Completed', startDate: '2023-06-01', endDate: '2023-12-15', client: 'Healthcare Provider', rating: 4.9, description: 'Developed ML pipelines for predictive patient care analytics' },
+    { id: 3, name: 'Digital Transformation Roadmap', role: 'Consultant', status: 'Completed', startDate: '2022-09-01', endDate: '2023-05-30', client: 'Retail Chain', rating: 4.5, description: 'Created technology strategy and implementation plan' },
+    { id: 4, name: 'Cybersecurity Assessment', role: 'Developer', status: 'Completed', startDate: '2021-06-15', endDate: '2022-08-30', client: 'Insurance Company', rating: 4.7, description: 'Built security monitoring dashboards and automated threat detection' }
+  ],
+  feedback: [
+    { id: 1, date: '2024-12-01', reviewer: 'Sarah Mitchell (Partner)', type: 'Annual Review', rating: 5, summary: 'Exceptional performance. Ready for promotion to Manager track.', strengths: ['Technical leadership', 'Client communication', 'Team mentorship'], improvements: ['Delegation', 'Strategic thinking'] },
+    { id: 2, date: '2024-06-15', reviewer: 'James Park (Manager)', type: 'Mid-Year Check-in', rating: 4, summary: 'Strong delivery on Cloud Migration project. Exceeded client expectations.', strengths: ['Problem solving', 'Technical depth', 'Deadline management'], improvements: ['Documentation'] },
+    { id: 3, date: '2023-12-01', reviewer: 'Sarah Mitchell (Partner)', type: 'Annual Review', rating: 4, summary: 'Solid year with consistent high-quality deliverables.', strengths: ['Code quality', 'Reliability', 'Learning agility'], improvements: ['Public speaking', 'Networking'] }
+  ],
+  skills: [
+    { name: 'JavaScript/TypeScript', level: 95, verified: true, category: 'Programming' },
+    { name: 'React', level: 90, verified: true, category: 'Frontend' },
+    { name: 'Node.js', level: 85, verified: true, category: 'Backend' },
+    { name: 'Python', level: 80, verified: true, category: 'Programming' },
+    { name: 'AWS', level: 75, verified: true, category: 'Cloud' },
+    { name: 'SQL/PostgreSQL', level: 80, verified: false, category: 'Database' },
+    { name: 'Docker/Kubernetes', level: 70, verified: false, category: 'DevOps' },
+    { name: 'Machine Learning', level: 60, verified: false, category: 'AI/ML' },
+    { name: 'System Design', level: 75, verified: false, category: 'Architecture' },
+    { name: 'Agile/Scrum', level: 85, verified: true, category: 'Methodology' }
+  ],
+  recommendations: [
+    { id: 1, title: 'Manager - Technology Consulting', department: 'Consulting', location: 'Dallas, TX', fitScore: 96, salary: '$140k-180k', reason: 'Natural progression based on performance and leadership skills' },
+    { id: 2, title: 'Senior Manager - AI & Data', department: 'Technology', location: 'Austin, TX', fitScore: 89, salary: '$160k-200k', reason: 'Strong ML skills and recent AI project experience' },
+    { id: 3, title: 'Director - Cloud Architecture', department: 'Technology', location: 'Remote', fitScore: 85, salary: '$180k-220k', reason: 'AWS expertise and cloud migration leadership' }
+  ],
+  publicProfile: {
+    spotlightLabel: 'Spotlight',
+    status: { label: 'Out of Office', backOn: 'Jan 28, 2026' },
+    bio: 'I enjoy meeting new people and finding ways to help them have an uplifting experience. I am passionate, love arts and enjoy spending time with ...',
+    contact: {
+      phone: '(1) 416 6172297',
+      email: 'alex.chen@ey.com',
+      location: 'Dallas, TX'
+    },
+    manager: { name: 'Jerry Choate', title: 'Head of R&D' },
+    org: {
+      company: 'BestRun (10000)',
+      businessUnit: 'Products (PRODS)',
+      division: 'Research & Development (RES_DEV)',
+      department: 'Technology Consulting'
+    },
+    absence: { range: 'January 25 – 27', label: 'Out of Office' },
+    skillHighlights: {
+      left: { label: 'Problem Solving', score: 4 },
+      right: { label: 'Business Processes', score: 4 }
+    },
+    competencies: [
+      { label: 'Attentive Listening', value: 5 },
+      { label: 'Inspiring and Motivating Others', value: 4 },
+      { label: 'Building and Supporting Teams', value: 4 },
+      { label: 'Critical Thinking', value: 3 },
+      { label: 'Displaying Technical Expertise', value: 3 }
+    ],
+    reportingLine: [
+      { name: 'Linda R. Simpson', title: 'CEO' },
+      { name: 'Janelle Boring', title: 'VP Products' },
+      { name: 'Jerry Choate', title: 'Head of R&D' }
+    ],
+    targetRoles: ['CHRO', 'Director of Marketing', 'VP Marketing'],
+    tags: ['Leadership', 'People Ops', 'Coaching', 'Culture']
+  }
+};
+
+async function fetchCareerData() {
+  try {
+    // Try to fetch from API
+    const [tablesRes] = await Promise.all([
+      fetch(`${API_BASE}/tables`).then(r => r.ok ? r.json() : null)
+    ]);
+    
+    if (!tablesRes) {
+      console.log('API not available, using mock data');
+      return { ...mockCareerData, fromDatabase: false };
+    }
+    
+    // API is available - fetch real data
+    const [employee, projects, feedback, skills, recommendations] = await Promise.all([
+      fetch(`${API_BASE}/employees/1`).then(r => r.json()).catch(() => null),
+      fetch(`${API_BASE}/employees/1/projects`).then(r => r.json()).catch(() => []),
+      fetch(`${API_BASE}/employees/1/feedback`).then(r => r.json()).catch(() => []),
+      fetch(`${API_BASE}/employees/1/skills`).then(r => r.json()).catch(() => []),
+      fetch(`${API_BASE}/employees/1/recommendations`).then(r => r.json()).catch(() => [])
+    ]);
+    
+    return {
+      employee: employee || mockCareerData.employee,
+      projects: projects.length > 0 ? projects : mockCareerData.projects,
+      feedback: feedback.length > 0 ? feedback : mockCareerData.feedback,
+      skills: skills.length > 0 ? skills : mockCareerData.skills,
+      recommendations: recommendations.length > 0 ? recommendations : mockCareerData.recommendations,
+      publicProfile: (employee && employee.publicProfile) ? employee.publicProfile : mockCareerData.publicProfile,
+      availableTables: tablesRes,
+      fromDatabase: true
+    };
+  } catch (error) {
+    console.log('Error fetching career data:', error);
+    return { ...mockCareerData, fromDatabase: false };
+  }
+}
+
+async function renderCareer() {
+  const content = document.getElementById('content-area');
+  
+  // Show loading state
+  content.innerHTML = `
+    <div class="d-flex justify-content-center align-items-center" style="height: 50vh;">
+      <div class="text-center">
+        <div class="spinner-border text-warning mb-3" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="text-muted">Loading career data...</p>
+      </div>
+    </div>
+  `;
+  
+  // Fetch data
+  const data = await fetchCareerData();
+  const { employee, projects, feedback, skills, recommendations, fromDatabase, availableTables } = data;
+  
+  // Calculate stats
+  const avgRating = feedback.length > 0 
+    ? (feedback.reduce((sum, f) => sum + (f.rating || 0), 0) / feedback.length).toFixed(1) 
+    : 'N/A';
+  const verifiedSkills = skills.filter(s => s.verified).length;
+  
+  content.innerHTML = `
+    <!-- Data Source Banner -->
+    <div class="alert ${fromDatabase ? 'alert-success' : 'alert-info'} d-flex align-items-center mb-4">
+      <i class="bi ${fromDatabase ? 'bi-database-check' : 'bi-info-circle'} me-2 fs-5"></i>
+      <div class="flex-grow-1">
+        ${fromDatabase 
+          ? `<strong>Connected to Database</strong> - Showing live data from MySQL` 
+          : `<strong>Demo Mode</strong> - Start the server to connect to MySQL database`}
+      </div>
+      ${fromDatabase && availableTables ? `
+        <button class="btn btn-sm btn-outline-success" onclick="showDatabaseInfo()">
+          <i class="bi bi-table me-1"></i>View Tables
+        </button>
+      ` : `
+        <a href="https://github.com/Shnmg1/Ais-Spring/tree/main/server" target="_blank" class="btn btn-sm btn-outline-info">
+          <i class="bi bi-github me-1"></i>Setup Guide
+        </a>
+      `}
+    </div>
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h4 class="mb-0">Career History</h4>
+      <div class="text-muted small">
+        <i class="bi bi-calendar3 me-1"></i>Joined: ${employee.startDate || 'March 2021'} 
+        <span class="mx-2">|</span>
+        <i class="bi bi-clock me-1"></i>${employee.yearsAtCompany || '4.8'} years at company
+      </div>
+    </div>
+    
+    <!-- Employee Profile Card -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <div class="row align-items-center">
+          <div class="col-auto">
+            <div class="bg-primary text-dark rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; font-size: 2rem; font-weight: bold;">
+              ${(employee.name || 'AC').split(' ').map(n => n[0]).join('')}
+            </div>
+          </div>
+          <div class="col">
+            <h3 class="mb-1">${employee.name || 'Alex Chen'}</h3>
+            <p class="text-muted mb-1">${employee.title || 'Senior Software Engineer'}</p>
+            <p class="text-muted mb-0 small">
+              <i class="bi bi-building me-1"></i>${employee.department || 'Technology Consulting'}
+              <span class="mx-2">•</span>
+              <i class="bi bi-geo-alt me-1"></i>${employee.location || 'Dallas, TX'}
+            </p>
+          </div>
+          <div class="col-auto text-end">
+            <div class="row g-4 text-center">
+              <div class="col">
+                <div class="fs-3 fw-bold text-warning">${projects.length}</div>
+                <small class="text-muted">Projects</small>
+              </div>
+              <div class="col">
+                <div class="fs-3 fw-bold text-success">${avgRating}</div>
+                <small class="text-muted">Avg Rating</small>
+              </div>
+              <div class="col">
+                <div class="fs-3 fw-bold text-info">${verifiedSkills}</div>
+                <small class="text-muted">Verified Skills</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="row g-4">
+      <!-- Past Projects Column -->
+      <div class="col-lg-6">
+        <div class="card h-100">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-folder2-open me-2"></i>Past Projects</span>
+            <span class="badge bg-secondary">${projects.length} total</span>
+          </div>
+          <div class="card-body p-0">
+            <div class="list-group list-group-flush" style="max-height: 400px; overflow-y: auto;">
+              ${projects.map(p => `
+                <div class="list-group-item bg-transparent">
+                  <div class="d-flex justify-content-between align-items-start mb-1">
+                    <h6 class="mb-0 text-white">${p.name}</h6>
+                    <span class="badge ${p.status === 'Completed' ? 'bg-success' : p.status === 'In Progress' ? 'bg-warning text-dark' : 'bg-secondary'}">${p.status}</span>
+                  </div>
+                  <p class="small text-muted mb-2">${p.description || ''}</p>
+                  <div class="d-flex justify-content-between align-items-center small">
+                    <span class="text-muted">
+                      <i class="bi bi-person me-1"></i>${p.role}
+                      <span class="mx-2">•</span>
+                      <i class="bi bi-building me-1"></i>${p.client}
+                    </span>
+                    <span>
+                      ${p.rating ? `<i class="bi bi-star-fill text-warning me-1"></i>${p.rating}` : ''}
+                    </span>
+                  </div>
+                  <div class="small text-muted mt-1">
+                    <i class="bi bi-calendar-range me-1"></i>${p.startDate} - ${p.endDate}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Feedback Column -->
+      <div class="col-lg-6">
+        <div class="card h-100">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-chat-left-quote me-2"></i>Performance Feedback</span>
+            <span class="badge bg-secondary">${feedback.length} reviews</span>
+          </div>
+          <div class="card-body p-0">
+            <div class="list-group list-group-flush" style="max-height: 400px; overflow-y: auto;">
+              ${feedback.map(f => `
+                <div class="list-group-item bg-transparent">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                      <span class="badge bg-primary me-2">${f.type}</span>
+                      <small class="text-muted">${f.date}</small>
+                    </div>
+                    <div>
+                      ${Array(5).fill(0).map((_, i) => `<i class="bi bi-star${i < f.rating ? '-fill text-warning' : ' text-muted'}"></i>`).join('')}
+                    </div>
+                  </div>
+                  <p class="mb-2 small">${f.summary}</p>
+                  <div class="small text-muted mb-1"><i class="bi bi-person me-1"></i>${f.reviewer}</div>
+                  ${f.strengths ? `
+                    <div class="mt-2">
+                      <small class="text-success"><i class="bi bi-plus-circle me-1"></i>Strengths:</small>
+                      <div class="d-flex flex-wrap gap-1 mt-1">
+                        ${f.strengths.map(s => `<span class="badge bg-success bg-opacity-25 text-success">${s}</span>`).join('')}
+                      </div>
+                    </div>
+                  ` : ''}
+                  ${f.improvements ? `
+                    <div class="mt-2">
+                      <small class="text-info"><i class="bi bi-arrow-up-circle me-1"></i>Growth Areas:</small>
+                      <div class="d-flex flex-wrap gap-1 mt-1">
+                        ${f.improvements.map(i => `<span class="badge bg-info bg-opacity-25 text-info">${i}</span>`).join('')}
+                      </div>
+                    </div>
+                  ` : ''}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="row g-4 mt-0">
+      <!-- Skills Section -->
+      <div class="col-lg-6">
+        <div class="card">
+          <div class="card-header">
+            <i class="bi bi-tools me-2"></i>Skills & Competencies
+          </div>
+          <div class="card-body">
+            <div class="row g-3">
+              ${skills.map(s => `
+                <div class="col-md-6">
+                  <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="small">
+                      ${s.name}
+                      ${s.verified ? '<i class="bi bi-patch-check-fill text-success ms-1" title="Verified"></i>' : ''}
+                    </span>
+                    <span class="small text-muted">${s.level}%</span>
+                  </div>
+                  <div class="progress" style="height: 6px;">
+                    <div class="progress-bar ${s.verified ? 'bg-success' : 'bg-info'}" style="width: ${s.level}%;"></div>
+                  </div>
+                  <small class="text-muted">${s.category}</small>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Recommended Internal Jobs -->
+      <div class="col-lg-6">
+        <div class="card">
+          <div class="card-header">
+            <i class="bi bi-stars me-2"></i>Recommended Internal Positions
+          </div>
+          <div class="card-body p-0">
+            <div class="list-group list-group-flush">
+              ${recommendations.map(r => `
+                <div class="list-group-item bg-transparent d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="mb-1 text-white">${r.title}</h6>
+                    <p class="small text-muted mb-1">
+                      <i class="bi bi-building me-1"></i>${r.department}
+                      <span class="mx-2">•</span>
+                      <i class="bi bi-geo-alt me-1"></i>${r.location}
+                      <span class="mx-2">•</span>
+                      <i class="bi bi-cash me-1"></i>${r.salary}
+                    </p>
+                    <small class="text-info"><i class="bi bi-lightbulb me-1"></i>${r.reason}</small>
+                  </div>
+                  <div class="text-end">
+                    <div class="fs-4 fw-bold ${r.fitScore >= 90 ? 'text-success' : r.fitScore >= 80 ? 'text-warning' : 'text-info'}">${r.fitScore}%</div>
+                    <small class="text-muted">Fit Score</small>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          <div class="card-footer">
+            <button class="btn btn-warning w-100" onclick="navigate('seeker-jobs')">
+              <i class="bi bi-search me-2"></i>Browse All Internal Positions
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Career Timeline -->
+    <div class="card mt-4">
+      <div class="card-header">
+        <i class="bi bi-clock-history me-2"></i>Career Timeline
+      </div>
+      <div class="card-body">
+        <canvas id="careerTimelineChart" style="max-height: 250px;"></canvas>
+      </div>
+    </div>
+  `;
+  
+  // Store table info globally for the modal
+  window._dbTables = availableTables;
+  
+  // Create career timeline chart
+  createChart('careerTimelineChart', {
+    type: 'line',
+    data: {
+      labels: ['2021', '2022', '2023', '2024', '2025'],
+      datasets: [
+        {
+          label: 'Performance Rating',
+          data: [3.8, 4.2, 4.0, 4.5, 4.8],
+          borderColor: 'rgba(255, 215, 0, 1)',
+          backgroundColor: 'rgba(255, 215, 0, 0.1)',
+          fill: true,
+          tension: 0.3,
+          yAxisID: 'y'
+        },
+        {
+          label: 'Projects Completed',
+          data: [1, 2, 3, 4, 4],
+          borderColor: 'rgba(75, 192, 192, 1)',
+          backgroundColor: 'rgba(75, 192, 192, 0.1)',
+          fill: true,
+          tension: 0.3,
+          yAxisID: 'y1'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: {
+        mode: 'index',
+        intersect: false
+      },
+      scales: {
+        y: {
+          type: 'linear',
+          display: true,
+          position: 'left',
+          min: 0,
+          max: 5,
+          title: { display: true, text: 'Rating', color: '#adb5bd' },
+          grid: { color: 'rgba(255,255,255,0.1)' },
+          ticks: { color: '#adb5bd' }
+        },
+        y1: {
+          type: 'linear',
+          display: true,
+          position: 'right',
+          min: 0,
+          max: 6,
+          title: { display: true, text: 'Projects', color: '#adb5bd' },
+          grid: { drawOnChartArea: false },
+          ticks: { color: '#adb5bd' }
+        },
+        x: {
+          grid: { color: 'rgba(255,255,255,0.1)' },
+          ticks: { color: '#adb5bd' }
+        }
+      },
+      plugins: {
+        legend: { labels: { color: '#adb5bd' } }
+      }
+    }
+  });
+}
+
+// Helper function to show database tables in a modal
+window.showDatabaseInfo = function() {
+  const tables = window._dbTables || [];
+  const tableNames = tables.map(t => Object.values(t)[0]);
+  
+  // Create modal HTML
+  const modalHtml = `
+    <div class="modal fade" id="dbInfoModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content bg-dark text-white">
+          <div class="modal-header border-secondary">
+            <h5 class="modal-title"><i class="bi bi-database me-2"></i>Database Tables</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <p class="text-muted mb-3">Connected to MySQL database with ${tableNames.length} tables:</p>
+            <div class="list-group">
+              ${tableNames.map(name => `
+                <div class="list-group-item bg-transparent text-white border-secondary d-flex justify-content-between align-items-center">
+                  <span><i class="bi bi-table me-2 text-warning"></i>${name}</span>
+                  <a href="http://localhost:3000/api/tables/${name}/data" target="_blank" class="btn btn-sm btn-outline-info">
+                    <i class="bi bi-eye"></i>
+                  </a>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          <div class="modal-footer border-secondary">
+            <a href="http://localhost:3000/api/tables" target="_blank" class="btn btn-outline-warning">
+              <i class="bi bi-code-slash me-1"></i>View API
+            </a>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  // Remove existing modal if any
+  const existing = document.getElementById('dbInfoModal');
+  if (existing) existing.remove();
+  
+  // Add and show modal
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+  const modal = new bootstrap.Modal(document.getElementById('dbInfoModal'));
+  modal.show();
+};
+
+function escapeHtml(value) {
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function getInitials(name) {
+  if (!name) return '';
+  return String(name)
+    .trim()
+    .split(/\s+/)
+    .map(part => part[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+}
+
+function clampRating(value) {
+  const num = Number(value);
+  if (Number.isNaN(num)) return 0;
+  return Math.max(1, Math.min(5, Math.round(num)));
+}
+
+function buildPublicProfileData(data) {
+  const fallback = (data && data.publicProfile) ? data.publicProfile : (mockCareerData.publicProfile || {});
+  const employee = (data && data.employee) ? data.employee : {};
+  const skills = Array.isArray(data && data.skills) ? data.skills : [];
+  const recommendations = Array.isArray(data && data.recommendations) ? data.recommendations : [];
+
+  const name = employee.name || fallback.name || 'Employee';
+  const title = employee.title || fallback.title || '';
+  const department = employee.department || (fallback.org && fallback.org.department) || '';
+  const location = employee.location || (fallback.contact && fallback.contact.location) || '';
+
+  const contact = {
+    phone: employee.phone || (fallback.contact && fallback.contact.phone) || '',
+    email: employee.email || (fallback.contact && fallback.contact.email) || '',
+    location
+  };
+
+  const org = {
+    company: (fallback.org && fallback.org.company) || '',
+    businessUnit: (fallback.org && fallback.org.businessUnit) || '',
+    division: (fallback.org && fallback.org.division) || '',
+    department
+  };
+
+  const skillHighlights = (() => {
+    const sorted = skills.slice().sort((a, b) => (b.level || 0) - (a.level || 0));
+    const first = sorted[0];
+    const second = sorted[1];
+    if (first && second) {
+      return {
+        left: { label: first.name, score: clampRating((first.level || 0) / 20) },
+        right: { label: second.name, score: clampRating((second.level || 0) / 20) }
+      };
+    }
+    return fallback.skillHighlights || {
+      left: { label: 'Problem Solving', score: 4 },
+      right: { label: 'Business Processes', score: 4 }
+    };
+  })();
+
+  const targetRoles = recommendations.length
+    ? recommendations.map(r => r.title).slice(0, 3)
+    : (fallback.targetRoles || []);
+
+  const tags = (() => {
+    const tagCandidates = skills.filter(s => s.verified).map(s => s.name);
+    const unique = Array.from(new Set(tagCandidates));
+    return unique.length ? unique.slice(0, 4) : (fallback.tags || []);
+  })();
+
+  return {
+    spotlightLabel: fallback.spotlightLabel || 'Spotlight',
+    status: fallback.status || { label: 'Available', backOn: '' },
+    name,
+    title,
+    department,
+    location,
+    contact,
+    bio: fallback.bio || '',
+    manager: fallback.manager || { name: '', title: '' },
+    org,
+    absence: fallback.absence || { range: '', label: '' },
+    skillHighlights,
+    competencies: fallback.competencies || [],
+    reportingLine: fallback.reportingLine || [],
+    targetRoles,
+    tags,
+    timeLabel: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+  };
+}
+
+// Public profile modal (matches site theme + styles)
+window.showPublicProfileModal = async function() {
+  const data = await fetchCareerData();
+  const profile = buildPublicProfileData(data);
+  const statusText = profile.status.backOn
+    ? `${profile.status.label} · Back on ${profile.status.backOn}`
+    : profile.status.label;
+
+  const contactRows = [
+    profile.contact.phone ? `
+      <div class="d-flex align-items-center mb-3">
+        <i class="bi bi-telephone me-2 text-warning"></i>
+        <span>${escapeHtml(profile.contact.phone)}</span>
+      </div>
+    ` : '',
+    profile.contact.email ? `
+      <div class="d-flex align-items-center mb-3">
+        <i class="bi bi-envelope me-2 text-warning"></i>
+        <span>${escapeHtml(profile.contact.email)}</span>
+      </div>
+    ` : '',
+    profile.contact.location ? `
+      <div class="d-flex align-items-center">
+        <i class="bi bi-geo-alt me-2 text-warning"></i>
+        <span>${escapeHtml(profile.contact.location)}</span>
+      </div>
+    ` : ''
+  ].filter(Boolean).join('');
+
+  const orgRows = [
+    profile.org.company ? `<div>Company: ${escapeHtml(profile.org.company)}</div>` : '',
+    profile.org.businessUnit ? `<div>Business Unit: ${escapeHtml(profile.org.businessUnit)}</div>` : '',
+    profile.org.division ? `<div>Division: ${escapeHtml(profile.org.division)}</div>` : '',
+    profile.org.department ? `<div>Department: ${escapeHtml(profile.org.department)}</div>` : ''
+  ].filter(Boolean).join('');
+
+  const modalHtml = `
+    <div class="modal fade public-profile-modal" id="publicProfileModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header border-bottom">
+            <div class="d-flex align-items-center gap-2">
+              <span class="badge bg-primary text-dark">${escapeHtml(profile.spotlightLabel)}</span>
+              <h5 class="modal-title mb-0">Public Profile</h5>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <button class="btn btn-outline-primary btn-sm">Full Profile</button>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+          </div>
+          <div class="modal-body p-0">
+            <div class="profile-cover"></div>
+            <div class="p-4 pt-0">
+              <div class="d-flex align-items-end gap-3 profile-hero">
+                <div class="profile-avatar bg-primary text-dark">${escapeHtml(getInitials(profile.name))}</div>
+                <div class="flex-grow-1">
+                  <div class="d-flex flex-wrap align-items-center gap-2">
+                    <h4 class="mb-0">${escapeHtml(profile.name)}</h4>
+                    <button class="btn btn-sm btn-outline-primary px-2 py-0">
+                      <i class="bi bi-pencil"></i>
+                    </button>
+                  </div>
+                  <div class="profile-info-card mt-2">
+                    <div class="small text-muted">
+                      ${escapeHtml(profile.title)}${profile.department ? ` · ${escapeHtml(profile.department)}` : ''}
+                    </div>
+                    <div class="d-flex flex-wrap gap-3 small text-muted mt-1">
+                      ${statusText ? `<span><i class="bi bi-clock me-1"></i>${escapeHtml(statusText)}</span>` : ''}
+                      ${profile.location ? `<span><i class="bi bi-geo-alt me-1"></i>${escapeHtml(profile.location)}</span>` : ''}
+                    </div>
+                  </div>
+                </div>
+                <div class="text-muted small d-none d-md-block">
+                  <i class="bi bi-clock me-1"></i>${escapeHtml(profile.timeLabel)} (Local Time)
+                </div>
+              </div>
+
+              <div class="row g-4 mt-3">
+                <!-- Left Sidebar -->
+                <div class="col-lg-4">
+                  <div class="card mb-4">
+                    <div class="card-header">
+                      <i class="bi bi-person-lines-fill me-2"></i>Contact
+                    </div>
+                    <div class="card-body">
+                      ${contactRows || '<span class="text-muted small">No contact details available.</span>'}
+                    </div>
+                  </div>
+
+                  <div class="card mb-4">
+                    <div class="card-header">
+                      <i class="bi bi-chat-left-text me-2"></i>Bio
+                    </div>
+                    <div class="card-body">
+                      <p class="text-muted mb-0">
+                        ${escapeHtml(profile.bio)}
+                        <a href="#" class="text-warning text-decoration-none">Show More</a>
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                      <span><i class="bi bi-people me-2"></i>Direct Manager</span>
+                      <i class="bi bi-diagram-3 text-warning"></i>
+                    </div>
+                    <div class="card-body d-flex align-items-center gap-3">
+                      <div class="profile-avatar-sm bg-primary text-dark">${escapeHtml(getInitials(profile.manager.name))}</div>
+                      <div>
+                        <div class="fw-semibold">${escapeHtml(profile.manager.name)}</div>
+                        <div class="text-muted small">${escapeHtml(profile.manager.title)}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="col-lg-8">
+                  <div class="row g-4">
+                    <div class="col-md-6">
+                      <div class="card h-100">
+                        <div class="card-header">
+                          <i class="bi bi-bullseye me-2"></i>Skills
+                        </div>
+                        <div class="card-body d-flex align-items-center justify-content-center">
+                          <div class="text-center">
+                            <div class="text-muted small mb-2">
+                              ${escapeHtml(profile.skillHighlights.left.label)} (${profile.skillHighlights.left.score}/5)
+                            </div>
+                            <div class="skill-ring">
+                              <div class="skill-ring-inner"></div>
+                            </div>
+                            <div class="text-muted small mt-2">
+                              ${escapeHtml(profile.skillHighlights.right.label)} (${profile.skillHighlights.right.score}/5)
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-6">
+                      <div class="card h-100">
+                        <div class="card-header">
+                          <i class="bi bi-graph-up me-2"></i>Competencies
+                        </div>
+                        <div class="card-body">
+                          ${profile.competencies.map(item => `
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                              <span class="small">${escapeHtml(item.label)}</span>
+                              <div class="d-flex align-items-center gap-2">
+                                <span class="small text-muted">${item.value}</span>
+                                <div class="progress competency-bar">
+                                  <div class="progress-bar bg-primary" style="width: ${item.value * 20}%;"></div>
+                                </div>
+                              </div>
+                            </div>
+                          `).join('')}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-6">
+                      <div class="card h-100">
+                        <div class="card-header">
+                          <i class="bi bi-building me-2"></i>Organization Information
+                        </div>
+                        <div class="card-body small text-muted">
+                          ${orgRows || '<div>No organization details available.</div>'}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-6">
+                      <div class="card h-100">
+                        <div class="card-header">
+                          <i class="bi bi-calendar2-week me-2"></i>Upcoming Absence
+                        </div>
+                        <div class="card-body d-flex align-items-center justify-content-between">
+                          <div>
+                            <div class="fw-semibold">${escapeHtml(profile.absence.range)}</div>
+                            <div class="text-muted small">${escapeHtml(profile.absence.label)}</div>
+                          </div>
+                          <div class="absence-icon bg-primary bg-opacity-25 text-warning">
+                            <i class="bi bi-door-open"></i>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-12">
+                      <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                          <span><i class="bi bi-diagram-2 me-2"></i>Reporting Line</span>
+                          <i class="bi bi-diagram-3 text-warning"></i>
+                        </div>
+                        <div class="card-body">
+                          <div class="row g-3">
+                            ${profile.reportingLine.map(entry => `
+                              <div class="col-md-4 d-flex align-items-center gap-2">
+                                <div class="profile-avatar-sm bg-primary text-dark">${escapeHtml(getInitials(entry.name))}</div>
+                                <div>
+                                  <div class="fw-semibold small">${escapeHtml(entry.name)}</div>
+                                  <div class="text-muted small">${escapeHtml(entry.title)}</div>
+                                </div>
+                              </div>
+                            `).join('')}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-6">
+                      <div class="card h-100">
+                        <div class="card-header">
+                          <i class="bi bi-briefcase me-2"></i>Target Roles
+                        </div>
+                        <div class="card-body">
+                          <div class="d-flex flex-wrap gap-2">
+                            ${profile.targetRoles.map(role => `
+                              <span class="badge bg-primary text-dark">${escapeHtml(role)}</span>
+                            `).join('')}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-6">
+                      <div class="card h-100">
+                        <div class="card-header">
+                          <i class="bi bi-tags me-2"></i>Tags
+                        </div>
+                        <div class="card-body">
+                          <div class="d-flex flex-wrap gap-2">
+                            ${profile.tags.map(tag => `
+                              <span class="badge bg-secondary">${escapeHtml(tag)}</span>
+                            `).join('')}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const existing = document.getElementById('publicProfileModal');
+  if (existing) existing.remove();
+
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+  const modal = new bootstrap.Modal(document.getElementById('publicProfileModal'));
+  modal.show();
+};
 
 function renderSeekerJobs() {
   const content = document.getElementById('content-area');
