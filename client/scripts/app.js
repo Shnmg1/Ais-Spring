@@ -678,7 +678,15 @@ function renderSeekerProfile() {
 // CAREER HISTORY PAGE (Database Connected)
 // ============================================================================
 
-const API_BASE = 'http://localhost:3000/api';
+// Auto-detect API base URL - works whether accessed via server or file://
+const API_BASE = (() => {
+  // If accessed via server (http://localhost:3000), use relative path
+  if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+    return `${window.location.origin}/api`;
+  }
+  // If opened as file://, use localhost
+  return 'http://localhost:3000/api';
+})();
 
 // Mock data fallback when API is unavailable
 const mockCareerData = {
@@ -735,13 +743,74 @@ async function fetchCareerData() {
     }
     
     // API is available - fetch real data
-    const [employee, projects, feedback, skills, recommendations] = await Promise.all([
-      fetch(`${API_BASE}/employees/1`).then(r => r.json()).catch(() => null),
+    const [employeeRaw, projects, feedback, skillsRaw, recommendationsRaw] = await Promise.all([
+      fetch(`${API_BASE}/employees`).then(r => r.json()).catch(() => null),
       fetch(`${API_BASE}/employees/1/projects`).then(r => r.json()).catch(() => []),
       fetch(`${API_BASE}/employees/1/feedback`).then(r => r.json()).catch(() => []),
       fetch(`${API_BASE}/employees/1/skills`).then(r => r.json()).catch(() => []),
       fetch(`${API_BASE}/employees/1/recommendations`).then(r => r.json()).catch(() => [])
     ]);
+    
+    // Transform employee data to match frontend expectations
+    let employee = null;
+    if (employeeRaw && !employeeRaw.message && !employeeRaw.mock) {
+      employee = {
+        id: employeeRaw.id,
+        employee_id: employeeRaw.employee_id,
+        name: `${employeeRaw.first_name || ''} ${employeeRaw.last_name || ''}`.trim() || 'Employee',
+        title: employeeRaw.role_title || 'Employee',
+        department: employeeRaw.service_line_name || employeeRaw.sub_service_line_name || 'Unknown',
+        startDate: employeeRaw.created_at ? new Date(employeeRaw.created_at).toISOString().split('T')[0] : null,
+        yearsAtCompany: parseFloat(employeeRaw.years_at_ey) || 0,
+        email: employeeRaw.email || '',
+        location: employeeRaw.location_name || 
+                  (employeeRaw.city && employeeRaw.state_province ? `${employeeRaw.city}, ${employeeRaw.state_province}` : null) ||
+                  employeeRaw.primary_location || 'Unknown',
+        // Include all raw data for reference
+        ...employeeRaw
+      };
+      console.log('Transformed employee data:', employee);
+    } else {
+      console.log('Using mock employee data. Raw response:', employeeRaw);
+    }
+    
+    // Transform skills data
+    let skills = [];
+    if (skillsRaw && Array.isArray(skillsRaw) && skillsRaw.length > 0) {
+      skills = skillsRaw.map(s => ({
+        name: s.skill_name || s.name,
+        level: s.proficiency_level || s.level || 0,
+        verified: s.verified === 1 || s.verified === true,
+        category: s.category || 'General',
+        skill_id: s.skill_id,
+        description: s.description
+      }));
+      console.log(`Loaded ${skills.length} skills from database`);
+    } else {
+      console.log('No skills from API, using mock data. Raw:', skillsRaw);
+    }
+    
+    // Transform recommendations data
+    let recommendations = [];
+    if (recommendationsRaw && Array.isArray(recommendationsRaw) && recommendationsRaw.length > 0) {
+      recommendations = recommendationsRaw.map(r => ({
+        id: r.id,
+        title: r.title,
+        department: r.service_line || r.sub_service_line || 'Unknown',
+        location: r.location || r.primary_location || 'Unknown',
+        fitScore: r.matchScore || 0,
+        salary: r.salary || 'Not specified',
+        reason: r.matchedEmployeeSkills && Array.isArray(r.matchedEmployeeSkills) ? 
+          `Matches your skills: ${r.matchedEmployeeSkills.join(', ')}` : 
+          'Based on your profile and experience',
+        url: r.url,
+        application_url: r.application_url,
+        rank_level: r.rank_level
+      }));
+      console.log(`Loaded ${recommendations.length} job recommendations from database`);
+    } else {
+      console.log('No recommendations from API, using mock data. Raw:', recommendationsRaw);
+    }
     
     return {
       employee: employee || mockCareerData.employee,
@@ -1128,32 +1197,91 @@ window.showDatabaseInfo = function() {
   modal.show();
 };
 
-function renderSeekerJobs() {
+async function renderSeekerJobs() {
   const content = document.getElementById('content-area');
   
-  // Enhanced job data with department and level for filtering
-  const jobs = [
-    { title: 'Staff - Assurance (External Audit)', company: 'EY', location: 'New York, NY', salary: '$65k-85k', fitScore: 98, department: 'Assurance', level: 'Staff / Associate' },
-    { title: 'Senior Consultant - Cybersecurity', company: 'EY', location: 'Chicago, IL', salary: '$95k-120k', fitScore: 94, department: 'Consulting', level: 'Senior Consultant / Senior Associate' },
-    { title: 'Manager - Technology Risk', company: 'EY', location: 'London, UK', salary: '$110k-140k', fitScore: 91, department: 'Assurance', level: 'Manager' },
-    { title: 'Intern - Data & Analytics', company: 'EY', location: 'Remote', salary: '$30/hr', fitScore: 88, department: 'Consulting', level: 'Intern' },
-    { title: 'Senior Manager - Strategy (EY-Parthenon)', company: 'EY', location: 'Boston, MA', salary: '$160k-200k', fitScore: 96, department: 'Strategy', level: 'Senior Manager' },
-    { title: 'Director - Business Tax Services', company: 'EY', location: 'Atlanta, GA', salary: '$180k-240k', fitScore: 89, department: 'Tax', level: 'Director' },
-    { title: 'Staff - Software Engineering', company: 'EY', location: 'Dallas, TX', salary: '$85k-105k', fitScore: 92, department: 'Internal Functions', level: 'Staff / Associate' },
-    { title: 'Associate - People Advisory Services', company: 'EY', location: 'San Francisco, CA', salary: '$75k-95k', fitScore: 85, department: 'Tax', level: 'Staff / Associate' },
-    { title: 'Partner - Transaction Diligence', company: 'EY', location: 'New York, NY', salary: '$250k+', fitScore: 97, department: 'Strategy', level: 'Partner / Principal' },
-    { title: 'Senior Associate - Supply Chain & Operations', company: 'EY', location: 'Seattle, WA', salary: '$90k-115k', fitScore: 93, department: 'Consulting', level: 'Senior Consultant / Senior Associate' },
-    { title: 'Manager - Forensic & Integrity', company: 'EY', location: 'Washington, DC', salary: '$115k-145k', fitScore: 90, department: 'Assurance', level: 'Manager' },
-    { title: 'Staff - Climate Change & Sustainability', company: 'EY', location: 'Los Angeles, CA', salary: '$70k-90k', fitScore: 87, department: 'Assurance', level: 'Staff / Associate' },
-    { title: 'Intern - Learning & Development', company: 'EY', location: 'Remote', salary: '$25/hr', fitScore: 84, department: 'Internal Functions', level: 'Intern' },
-    { title: 'Senior Consultant - Finance Transformation', company: 'EY', location: 'Chicago, IL', salary: '$100k-125k', fitScore: 95, department: 'Consulting', level: 'Senior Consultant / Senior Associate' },
-    { title: 'Director - General Counsel', company: 'EY', location: 'New York, NY', salary: '$200k-280k', fitScore: 91, department: 'Internal Functions', level: 'Director' },
-    { title: 'Senior Manager - Tax Technology', company: 'EY', location: 'San Jose, CA', salary: '$150k-190k', fitScore: 89, department: 'Tax', level: 'Senior Manager' },
-    { title: 'Associate - Network & Infrastructure', company: 'EY', location: 'Alpharetta, GA', salary: '$70k-90k', fitScore: 86, department: 'Internal Functions', level: 'Staff / Associate' },
-    { title: 'Staff - Brand, Marketing & Communications', company: 'EY', location: 'London, UK', salary: '$55k-75k', fitScore: 83, department: 'Internal Functions', level: 'Staff / Associate' },
-    { title: 'Manager - Turnaround & Restructuring', company: 'EY', location: 'Chicago, IL', salary: '$130k-160k', fitScore: 92, department: 'Strategy', level: 'Manager' },
-    { title: 'Senior Consultant - Global Compliance & Reporting', company: 'EY', location: 'Miami, FL', salary: '$95k-115k', fitScore: 88, department: 'Tax', level: 'Senior Consultant / Senior Associate' }
-  ];
+  // Show loading state
+  content.innerHTML = `
+    <div class="d-flex justify-content-center align-items-center" style="height: 50vh;">
+      <div class="text-center">
+        <div class="spinner-border text-warning mb-3" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="text-muted">Loading jobs from database...</p>
+      </div>
+    </div>
+  `;
+  
+  // Fetch jobs from API
+  let jobs = [];
+  let recommendations = [];
+  
+  try {
+    // Get all jobs from database
+    const jobsResponse = await fetch(`${API_BASE}/jobs?limit=200`);
+    if (jobsResponse.ok) {
+      const jobsData = await jobsResponse.json();
+      jobs = jobsData.map(job => ({
+        id: job.id,
+        title: job.title || 'Untitled Position',
+        company: job.company || 'EY',
+        location: job.location || job.primary_location || 'Location TBD',
+        salary: 'Salary not specified', // jobs_temp doesn't have salary field
+        fitScore: 0, // Will be calculated or fetched from recommendations
+        department: job.service_line || job.sub_service_line || 'Unknown',
+        level: job.rank_level || 'Not specified',
+        url: job.url,
+        application_url: job.application_url,
+        requisition_id: job.requisition_id,
+        description: job.description,
+        work_model: job.work_model,
+        posted_date: job.posted_date
+      }));
+      console.log(`Loaded ${jobs.length} jobs from database`);
+    }
+    
+    // Get recommendations for current employee (if available) to get fit scores
+    try {
+      const empResponse = await fetch(`${API_BASE}/employees`);
+      if (empResponse.ok) {
+        const emp = await empResponse.json();
+        if (emp && emp.employee_id) {
+          const recResponse = await fetch(`${API_BASE}/employees/${emp.employee_id}/recommendations`);
+          if (recResponse.ok) {
+            recommendations = await recResponse.json();
+            console.log(`Loaded ${recommendations.length} recommendations with match scores`);
+          }
+        }
+      }
+    } catch (e) {
+      console.log('Could not load recommendations:', e);
+    }
+    
+    // Merge fit scores from recommendations into jobs
+    if (recommendations.length > 0) {
+      const recMap = new Map();
+      recommendations.forEach(rec => {
+        if (rec.id) recMap.set(rec.id, rec.matchScore || 0);
+      });
+      jobs = jobs.map(job => ({
+        ...job,
+        fitScore: recMap.get(job.id) || 0
+      }));
+    }
+    
+  } catch (error) {
+    console.error('Error fetching jobs:', error);
+    // Fallback to empty array - will show "No jobs found"
+  }
+  
+  // If no jobs from API, use empty array (will show empty state)
+  if (jobs.length === 0) {
+    console.log('No jobs found in database, showing empty state');
+  }
+
+  // Extract unique departments and levels from jobs for filter dropdowns
+  const uniqueDepartments = [...new Set(jobs.map(j => j.department).filter(Boolean))].sort();
+  const uniqueLevels = [...new Set(jobs.map(j => j.level).filter(Boolean))].sort();
 
   // State for active filters
   const activeFilters = {
@@ -1167,7 +1295,7 @@ function renderSeekerJobs() {
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h4 class="mb-0">Job Board</h4>
       <div class="d-flex align-items-baseline">
-        <span id="jobCountDisplay" class="h2 fw-bold text-warning mb-0 me-2">0</span>
+        <span id="jobCountDisplay" class="h2 fw-bold text-warning mb-0 me-2">${jobs.length}</span>
         <span class="text-muted">available positions</span>
       </div>
     </div>
@@ -1179,23 +1307,13 @@ function renderSeekerJobs() {
           <div class="col-md-3">
             <select class="form-select form-select-sm" id="deptFilter">
               <option value="" selected>Add Department...</option>
-              <option value="Assurance">Assurance</option>
-              <option value="Consulting">Consulting</option>
-              <option value="Strategy">Strategy</option>
-              <option value="Tax">Tax</option>
-              <option value="Internal Functions">Internal Functions</option>
+              ${uniqueDepartments.map(dept => `<option value="${dept}">${dept}</option>`).join('')}
             </select>
           </div>
           <div class="col-md-3">
             <select class="form-select form-select-sm" id="levelFilter">
               <option value="" selected>Add Level...</option>
-              <option value="Intern">Intern</option>
-              <option value="Staff / Associate">Staff / Associate</option>
-              <option value="Senior Consultant / Senior Associate">Senior Consultant / Senior Associate</option>
-              <option value="Manager">Manager</option>
-              <option value="Senior Manager">Senior Manager</option>
-              <option value="Director">Director</option>
-              <option value="Partner / Principal">Partner / Principal</option>
+              ${uniqueLevels.map(level => `<option value="${level}">${level}</option>`).join('')}
             </select>
           </div>
           <div class="col-md-3">
@@ -1286,6 +1404,12 @@ function renderSeekerJobs() {
         }, 'bg-success');
     }
 
+    // Update count display
+    const countEl = document.getElementById('jobCountDisplay');
+    if (countEl) {
+      countEl.textContent = filtered.length;
+    }
+    
     // 3. Render Job Cards
     const container = document.getElementById('jobsContainer');
     
@@ -1303,28 +1427,42 @@ function renderSeekerJobs() {
       <div class="col-12">
         <div class="card">
           <div class="card-body d-flex justify-content-between align-items-center">
-            <div>
+            <div class="flex-grow-1">
               <div class="d-flex align-items-center mb-1">
                 <h5 class="card-title mb-0 me-2">${job.title}</h5>
                 <span class="badge bg-light text-dark border me-1">${job.department}</span>
+                ${job.level && job.level !== 'Not specified' ? `<span class="badge bg-info text-dark me-1">${job.level}</span>` : ''}
               </div>
-              <p class="card-text text-muted mb-0">
+              <p class="card-text text-muted mb-1">
                 <i class="bi bi-building me-1"></i>${job.company} · 
-                <i class="bi bi-geo-alt me-1"></i>${job.location} · 
-                <i class="bi bi-cash me-1"></i>${job.salary}
+                <i class="bi bi-geo-alt me-1"></i>${job.location}
+                ${job.work_model ? ` · <i class="bi bi-briefcase me-1"></i>${job.work_model}` : ''}
               </p>
+              ${job.posted_date ? `<small class="text-muted"><i class="bi bi-calendar me-1"></i>Posted: ${job.posted_date}</small>` : ''}
             </div>
             <div class="d-flex align-items-center gap-3">
-              <div class="text-center">
-                <div class="fs-4 fw-bold ${job.fitScore >= 90 ? 'text-success' : job.fitScore >= 80 ? 'text-warning' : 'text-secondary'}">${job.fitScore}%</div>
-                <small class="text-muted">AI Fit Score</small>
-              </div>
-              <button class="btn btn-warning">
+              ${job.fitScore > 0 ? `
+                <div class="text-center">
+                  <div class="fs-4 fw-bold ${job.fitScore >= 90 ? 'text-success' : job.fitScore >= 80 ? 'text-warning' : 'text-secondary'}">${job.fitScore}%</div>
+                  <small class="text-muted">AI Fit Score</small>
+                </div>
+              ` : ''}
+              <button class="btn btn-warning" onclick="navigate('seeker-profile'); return false;">
                 <i class="bi bi-bar-chart me-1"></i>Gap Analysis
               </button>
-              <button class="btn btn-primary">
-                Apply
-              </button>
+              ${job.application_url ? `
+                <a href="${job.application_url}" target="_blank" class="btn btn-primary">
+                  Apply
+                </a>
+              ` : job.url ? `
+                <a href="${job.url}" target="_blank" class="btn btn-primary">
+                  View Details
+                </a>
+              ` : `
+                <button class="btn btn-primary" disabled>
+                  Apply
+                </button>
+              `}
             </div>
           </div>
         </div>
