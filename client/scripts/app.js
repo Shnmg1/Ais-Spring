@@ -78,6 +78,61 @@ function createChart(canvasId, config) {
   return chart;
 }
 
+function getSkillGapRadarConfig() {
+  return {
+    type: 'radar',
+    data: {
+      labels: ['JavaScript', 'TypeScript', 'React', 'Node.js', 'System Design', 'AWS'],
+      datasets: [
+        {
+          label: 'Your Skills',
+          data: [90, 75, 85, 70, 45, 30],
+          backgroundColor: 'rgba(54, 162, 235, 0.2)',
+          borderColor: 'rgba(54, 162, 235, 1)',
+          borderWidth: 2
+        },
+        {
+          label: 'Target Role',
+          data: [85, 90, 90, 80, 75, 60],
+          backgroundColor: 'rgba(255, 99, 132, 0.2)',
+          borderColor: 'rgba(255, 99, 132, 1)',
+          borderWidth: 2
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        r: {
+          beginAtZero: true,
+          max: 100,
+          grid: {
+            color: 'rgba(255, 255, 255, 0.1)'
+          },
+          angleLines: {
+            color: 'rgba(255, 255, 255, 0.1)'
+          },
+          pointLabels: {
+            color: '#adb5bd'
+          },
+          ticks: {
+            backdropColor: 'transparent',
+            color: '#adb5bd'
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          labels: {
+            color: '#adb5bd'
+          }
+        }
+      }
+    }
+  };
+}
+
 // ============================================================================
 // ANIMATION UTILITIES
 // ============================================================================
@@ -153,7 +208,7 @@ function renderShell(role) {
   // Brand
   const brand = document.createElement('h4');
   brand.className = 'mb-4 fw-bold text-always-white d-flex align-items-center';
-  brand.innerHTML = '<img src="../resources/images/TalentFlow%20icon.png" alt="TalentFlow" style="height: 1.5rem;" class="me-2">TalentFlow';
+  brand.innerHTML = '<img src="../resources/images/EYLOGOWHITE.png" alt="EY" style="height: 1.5rem;" class="me-2"><span class="ms-3" style="margin-top: 2px; display: inline-block;">TalentFlow</span>';
   sidebar.appendChild(brand);
 
   // Nav pills
@@ -491,58 +546,7 @@ function renderSeekerHome() {
   `;
 
   // Create Skill Gap Radar Chart
-  createChart('skillGapRadar', {
-    type: 'radar',
-    data: {
-      labels: ['JavaScript', 'TypeScript', 'React', 'Node.js', 'System Design', 'AWS'],
-      datasets: [
-        {
-          label: 'Your Skills',
-          data: [90, 75, 85, 70, 45, 30],
-          backgroundColor: 'rgba(54, 162, 235, 0.2)',
-          borderColor: 'rgba(54, 162, 235, 1)',
-          borderWidth: 2
-        },
-        {
-          label: 'Target Role',
-          data: [85, 90, 90, 80, 75, 60],
-          backgroundColor: 'rgba(255, 99, 132, 0.2)',
-          borderColor: 'rgba(255, 99, 132, 1)',
-          borderWidth: 2
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        r: {
-          beginAtZero: true,
-          max: 100,
-          grid: {
-            color: 'rgba(255, 255, 255, 0.1)'
-          },
-          angleLines: {
-            color: 'rgba(255, 255, 255, 0.1)'
-          },
-          pointLabels: {
-            color: '#adb5bd'
-          },
-          ticks: {
-            backdropColor: 'transparent',
-            color: '#adb5bd'
-          }
-        }
-      },
-      plugins: {
-        legend: {
-            labels: {
-                color: '#adb5bd'
-            }
-        }
-      }
-    }
-  });
+  createChart('skillGapRadar', getSkillGapRadarConfig());
 }
 
 function renderSeekerProfile() {
@@ -1263,10 +1267,28 @@ function buildPublicProfileData(data) {
   };
 }
 
-// Public profile modal (matches site theme + styles)
-window.showPublicProfileModal = async function() {
-  const data = await fetchCareerData();
-  const profile = buildPublicProfileData(data);
+let publicProfileDataPromise = null;
+let publicProfileDataCache = null;
+
+function fetchPublicProfileData() {
+  if (publicProfileDataCache) {
+    return Promise.resolve(publicProfileDataCache);
+  }
+  if (!publicProfileDataPromise) {
+    publicProfileDataPromise = fetchCareerData()
+      .then((data) => {
+        publicProfileDataCache = data;
+        return data;
+      })
+      .catch((error) => {
+        console.error('Failed to fetch career data for public profile:', error);
+        return null;
+      });
+  }
+  return publicProfileDataPromise;
+}
+
+function buildPublicProfileModalContent(profile) {
   const statusText = profile.status.backOn
     ? `${profile.status.label} · Back on ${profile.status.backOn}`
     : profile.status.label;
@@ -1299,209 +1321,192 @@ window.showPublicProfileModal = async function() {
     profile.org.department ? `<div>Department: ${escapeHtml(profile.org.department)}</div>` : ''
   ].filter(Boolean).join('');
 
-  const modalHtml = `
-    <div class="modal fade public-profile-modal" id="publicProfileModal" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content">
-          <div class="modal-header border-bottom">
-            <div class="d-flex align-items-center gap-2">
-              <span class="badge bg-primary text-dark">${escapeHtml(profile.spotlightLabel)}</span>
-              <h5 class="modal-title mb-0">Public Profile</h5>
+  return `
+    <div class="modal-header border-bottom position-relative">
+      <h5 class="modal-title mb-0">Public Profile</h5>
+      <div class="d-flex align-items-center gap-2 position-absolute top-0 end-0 m-2">
+        <button class="btn btn-outline-primary btn-sm">Full Profile</button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+    </div>
+    <div class="modal-body p-0">
+      <div class="profile-cover"></div>
+      <div class="p-4 pt-0">
+        <div class="d-flex align-items-end gap-3 profile-hero">
+          <div class="profile-avatar bg-primary text-dark">${escapeHtml(getInitials(profile.name))}</div>
+          <div class="flex-grow-1">
+            <div class="d-flex flex-wrap align-items-center gap-2">
+              <h4 class="mb-0">${escapeHtml(profile.name)}</h4>
+              <button class="btn p-0 border-0 bg-transparent" aria-label="Edit profile">
+                <i class="bi bi-pencil"></i>
+              </button>
             </div>
-            <div class="d-flex align-items-center gap-2">
-              <button class="btn btn-outline-primary btn-sm">Full Profile</button>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="profile-info-card mt-2">
+              <div class="small text-dark">
+                ${escapeHtml(profile.title)}${profile.department ? ` · ${escapeHtml(profile.department)}` : ''}
+              </div>
+              <div class="d-flex flex-wrap gap-3 small text-dark mt-1">
+                ${statusText ? `<span><i class="bi bi-clock me-1"></i>${escapeHtml(statusText)}</span>` : ''}
+                ${profile.location ? `<span><i class="bi bi-geo-alt me-1"></i>${escapeHtml(profile.location)}</span>` : ''}
+              </div>
             </div>
           </div>
-          <div class="modal-body p-0">
-            <div class="profile-cover"></div>
-            <div class="p-4 pt-0">
-              <div class="d-flex align-items-end gap-3 profile-hero">
-                <div class="profile-avatar bg-primary text-dark">${escapeHtml(getInitials(profile.name))}</div>
-                <div class="flex-grow-1">
-                  <div class="d-flex flex-wrap align-items-center gap-2">
-                    <h4 class="mb-0">${escapeHtml(profile.name)}</h4>
-                    <button class="btn btn-sm btn-outline-primary px-2 py-0">
-                      <i class="bi bi-pencil"></i>
-                    </button>
-                  </div>
-                  <div class="profile-info-card mt-2">
-                    <div class="small text-muted">
-                      ${escapeHtml(profile.title)}${profile.department ? ` · ${escapeHtml(profile.department)}` : ''}
-                    </div>
-                    <div class="d-flex flex-wrap gap-3 small text-muted mt-1">
-                      ${statusText ? `<span><i class="bi bi-clock me-1"></i>${escapeHtml(statusText)}</span>` : ''}
-                      ${profile.location ? `<span><i class="bi bi-geo-alt me-1"></i>${escapeHtml(profile.location)}</span>` : ''}
-                    </div>
-                  </div>
+          <div class="text-muted small d-none d-md-block">
+            <i class="bi bi-clock me-1"></i>${escapeHtml(profile.timeLabel)} (Local Time)
+          </div>
+        </div>
+
+        <div class="row g-4 mt-3">
+          <!-- Left Sidebar -->
+          <div class="col-lg-4">
+            <div class="card mb-4">
+              <div class="card-header">
+                <i class="bi bi-person-lines-fill me-2"></i>Contact
+              </div>
+              <div class="card-body">
+                ${contactRows || '<span class="text-muted small">No contact details available.</span>'}
+              </div>
+            </div>
+
+            <div class="card mb-4">
+              <div class="card-header">
+                <i class="bi bi-chat-left-text me-2"></i>Bio
+              </div>
+              <div class="card-body">
+                <p class="text-muted mb-0">
+                  ${escapeHtml(profile.bio)}
+                  <a href="#" class="text-warning text-decoration-none">Show More</a>
+                </p>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-people me-2"></i>Direct Manager</span>
+                <i class="bi bi-diagram-3 text-warning"></i>
+              </div>
+              <div class="card-body d-flex align-items-center gap-3">
+                <div class="profile-avatar-sm bg-primary text-dark">${escapeHtml(getInitials(profile.manager.name))}</div>
+                <div>
+                  <div class="fw-semibold">${escapeHtml(profile.manager.name)}</div>
+                  <div class="text-muted small">${escapeHtml(profile.manager.title)}</div>
                 </div>
-                <div class="text-muted small d-none d-md-block">
-                  <i class="bi bi-clock me-1"></i>${escapeHtml(profile.timeLabel)} (Local Time)
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Content -->
+          <div class="col-lg-8">
+            <div class="row g-4">
+              <div class="col-md-6">
+                <div class="card h-100">
+                  <div class="card-header">
+                    <i class="bi bi-bullseye me-2"></i>Skills
+                  </div>
+                  <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-center" style="min-height: 240px;">
+                      <canvas id="publicProfileSkillGapRadar" style="max-height: 250px;"></canvas>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div class="row g-4 mt-3">
-                <!-- Left Sidebar -->
-                <div class="col-lg-4">
-                  <div class="card mb-4">
-                    <div class="card-header">
-                      <i class="bi bi-person-lines-fill me-2"></i>Contact
-                    </div>
-                    <div class="card-body">
-                      ${contactRows || '<span class="text-muted small">No contact details available.</span>'}
-                    </div>
+              <div class="col-md-6">
+                <div class="card h-100">
+                  <div class="card-header">
+                    <i class="bi bi-graph-up me-2"></i>Competencies
                   </div>
-
-                  <div class="card mb-4">
-                    <div class="card-header">
-                      <i class="bi bi-chat-left-text me-2"></i>Bio
-                    </div>
-                    <div class="card-body">
-                      <p class="text-muted mb-0">
-                        ${escapeHtml(profile.bio)}
-                        <a href="#" class="text-warning text-decoration-none">Show More</a>
-                      </p>
-                    </div>
-                  </div>
-
-                  <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                      <span><i class="bi bi-people me-2"></i>Direct Manager</span>
-                      <i class="bi bi-diagram-3 text-warning"></i>
-                    </div>
-                    <div class="card-body d-flex align-items-center gap-3">
-                      <div class="profile-avatar-sm bg-primary text-dark">${escapeHtml(getInitials(profile.manager.name))}</div>
-                      <div>
-                        <div class="fw-semibold">${escapeHtml(profile.manager.name)}</div>
-                        <div class="text-muted small">${escapeHtml(profile.manager.title)}</div>
+                  <div class="card-body">
+                    ${profile.competencies.map(item => `
+                      <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="small">${escapeHtml(item.label)}</span>
+                        <div class="d-flex align-items-center gap-2">
+                          <span class="small text-muted">${item.value}</span>
+                          <div class="progress competency-bar">
+                            <div class="progress-bar bg-primary" style="width: ${item.value * 20}%;"></div>
+                          </div>
+                        </div>
                       </div>
+                    `).join('')}
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="card h-100">
+                  <div class="card-header">
+                    <i class="bi bi-building me-2"></i>Organization Information
+                  </div>
+                  <div class="card-body small text-muted">
+                    ${orgRows || '<div>No organization details available.</div>'}
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="card h-100">
+                  <div class="card-header">
+                    <i class="bi bi-calendar2-week me-2"></i>Upcoming Absence
+                  </div>
+                  <div class="card-body d-flex align-items-center justify-content-between">
+                    <div>
+                      <div class="fw-semibold">${escapeHtml(profile.absence.range)}</div>
+                      <div class="text-muted small">${escapeHtml(profile.absence.label)}</div>
+                    </div>
+                    <div class="absence-icon bg-primary bg-opacity-25 text-warning">
+                      <i class="bi bi-door-open"></i>
                     </div>
                   </div>
                 </div>
+              </div>
 
-                <!-- Main Content -->
-                <div class="col-lg-8">
-                  <div class="row g-4">
-                    <div class="col-md-6">
-                      <div class="card h-100">
-                        <div class="card-header">
-                          <i class="bi bi-bullseye me-2"></i>Skills
-                        </div>
-                        <div class="card-body d-flex align-items-center justify-content-center">
-                          <div class="text-center">
-                            <div class="text-muted small mb-2">
-                              ${escapeHtml(profile.skillHighlights.left.label)} (${profile.skillHighlights.left.score}/5)
-                            </div>
-                            <div class="skill-ring">
-                              <div class="skill-ring-inner"></div>
-                            </div>
-                            <div class="text-muted small mt-2">
-                              ${escapeHtml(profile.skillHighlights.right.label)} (${profile.skillHighlights.right.score}/5)
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="col-md-6">
-                      <div class="card h-100">
-                        <div class="card-header">
-                          <i class="bi bi-graph-up me-2"></i>Competencies
-                        </div>
-                        <div class="card-body">
-                          ${profile.competencies.map(item => `
-                            <div class="d-flex align-items-center justify-content-between mb-2">
-                              <span class="small">${escapeHtml(item.label)}</span>
-                              <div class="d-flex align-items-center gap-2">
-                                <span class="small text-muted">${item.value}</span>
-                                <div class="progress competency-bar">
-                                  <div class="progress-bar bg-primary" style="width: ${item.value * 20}%;"></div>
-                                </div>
-                              </div>
-                            </div>
-                          `).join('')}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="col-md-6">
-                      <div class="card h-100">
-                        <div class="card-header">
-                          <i class="bi bi-building me-2"></i>Organization Information
-                        </div>
-                        <div class="card-body small text-muted">
-                          ${orgRows || '<div>No organization details available.</div>'}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="col-md-6">
-                      <div class="card h-100">
-                        <div class="card-header">
-                          <i class="bi bi-calendar2-week me-2"></i>Upcoming Absence
-                        </div>
-                        <div class="card-body d-flex align-items-center justify-content-between">
+              <div class="col-md-12">
+                <div class="card">
+                  <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-diagram-2 me-2"></i>Reporting Line</span>
+                    <i class="bi bi-diagram-3 text-warning"></i>
+                  </div>
+                  <div class="card-body">
+                    <div class="row g-3">
+                      ${profile.reportingLine.map(entry => `
+                        <div class="col-md-4 d-flex align-items-center gap-2">
+                          <div class="profile-avatar-sm bg-primary text-dark">${escapeHtml(getInitials(entry.name))}</div>
                           <div>
-                            <div class="fw-semibold">${escapeHtml(profile.absence.range)}</div>
-                            <div class="text-muted small">${escapeHtml(profile.absence.label)}</div>
-                          </div>
-                          <div class="absence-icon bg-primary bg-opacity-25 text-warning">
-                            <i class="bi bi-door-open"></i>
+                            <div class="fw-semibold small">${escapeHtml(entry.name)}</div>
+                            <div class="text-muted small">${escapeHtml(entry.title)}</div>
                           </div>
                         </div>
-                      </div>
+                      `).join('')}
                     </div>
+                  </div>
+                </div>
+              </div>
 
-                    <div class="col-md-12">
-                      <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                          <span><i class="bi bi-diagram-2 me-2"></i>Reporting Line</span>
-                          <i class="bi bi-diagram-3 text-warning"></i>
-                        </div>
-                        <div class="card-body">
-                          <div class="row g-3">
-                            ${profile.reportingLine.map(entry => `
-                              <div class="col-md-4 d-flex align-items-center gap-2">
-                                <div class="profile-avatar-sm bg-primary text-dark">${escapeHtml(getInitials(entry.name))}</div>
-                                <div>
-                                  <div class="fw-semibold small">${escapeHtml(entry.name)}</div>
-                                  <div class="text-muted small">${escapeHtml(entry.title)}</div>
-                                </div>
-                              </div>
-                            `).join('')}
-                          </div>
-                        </div>
-                      </div>
+              <div class="col-md-6">
+                <div class="card h-100">
+                  <div class="card-header">
+                    <i class="bi bi-briefcase me-2"></i>Target Roles
+                  </div>
+                  <div class="card-body">
+                    <div class="d-flex flex-wrap gap-2">
+                      ${profile.targetRoles.map(role => `
+                        <span class="badge bg-primary text-dark">${escapeHtml(role)}</span>
+                      `).join('')}
                     </div>
+                  </div>
+                </div>
+              </div>
 
-                    <div class="col-md-6">
-                      <div class="card h-100">
-                        <div class="card-header">
-                          <i class="bi bi-briefcase me-2"></i>Target Roles
-                        </div>
-                        <div class="card-body">
-                          <div class="d-flex flex-wrap gap-2">
-                            ${profile.targetRoles.map(role => `
-                              <span class="badge bg-primary text-dark">${escapeHtml(role)}</span>
-                            `).join('')}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="col-md-6">
-                      <div class="card h-100">
-                        <div class="card-header">
-                          <i class="bi bi-tags me-2"></i>Tags
-                        </div>
-                        <div class="card-body">
-                          <div class="d-flex flex-wrap gap-2">
-                            ${profile.tags.map(tag => `
-                              <span class="badge bg-secondary">${escapeHtml(tag)}</span>
-                            `).join('')}
-                          </div>
-                        </div>
-                      </div>
+              <div class="col-md-6">
+                <div class="card h-100">
+                  <div class="card-header">
+                    <i class="bi bi-tags me-2"></i>Tags
+                  </div>
+                  <div class="card-body">
+                    <div class="d-flex flex-wrap gap-2">
+                      ${profile.tags.map(tag => `
+                        <span class="badge bg-secondary">${escapeHtml(tag)}</span>
+                      `).join('')}
                     </div>
                   </div>
                 </div>
@@ -1512,13 +1517,86 @@ window.showPublicProfileModal = async function() {
       </div>
     </div>
   `;
+}
+
+// Public profile modal (matches site theme + styles)
+window.showPublicProfileModal = function() {
+  fetchPublicProfileData();
+
+  const profile = buildPublicProfileData(publicProfileDataCache || { ...mockCareerData, fromDatabase: false });
+  const modalHtml = `
+    <div class="modal fade public-profile-modal" id="publicProfileModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+          ${buildPublicProfileModalContent(profile)}
+        </div>
+      </div>
+    </div>
+  `;
 
   const existing = document.getElementById('publicProfileModal');
   if (existing) existing.remove();
 
   document.body.insertAdjacentHTML('beforeend', modalHtml);
-  const modal = new bootstrap.Modal(document.getElementById('publicProfileModal'));
-  modal.show();
+  const modalEl = document.getElementById('publicProfileModal');
+  if (!modalEl) return;
+
+  if (window.bootstrap && window.bootstrap.Modal) {
+    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    modal.show();
+    createChart('publicProfileSkillGapRadar', getSkillGapRadarConfig());
+
+    fetchPublicProfileData().then((data) => {
+      if (!data) return;
+      const currentModal = document.getElementById('publicProfileModal');
+      if (!currentModal) return;
+      const contentEl = currentModal.querySelector('.modal-content');
+      if (!contentEl) return;
+      const refreshedProfile = buildPublicProfileData({ ...data, fromDatabase: true });
+      contentEl.innerHTML = buildPublicProfileModalContent(refreshedProfile);
+      createChart('publicProfileSkillGapRadar', getSkillGapRadarConfig());
+    });
+    return;
+  }
+
+  // Fallback if Bootstrap JS is unavailable
+  modalEl.classList.add('show');
+  modalEl.style.display = 'block';
+  modalEl.removeAttribute('aria-hidden');
+  modalEl.setAttribute('aria-modal', 'true');
+  document.body.classList.add('modal-open');
+
+  const backdrop = document.createElement('div');
+  backdrop.className = 'modal-backdrop fade show';
+  backdrop.dataset.publicProfileBackdrop = 'true';
+  document.body.appendChild(backdrop);
+  createChart('publicProfileSkillGapRadar', getSkillGapRadarConfig());
+
+  const closeModal = () => {
+    modalEl.classList.remove('show');
+    modalEl.style.display = 'none';
+    modalEl.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('modal-open');
+    const existingBackdrop = document.querySelector('.modal-backdrop[data-public-profile-backdrop="true"]');
+    if (existingBackdrop) existingBackdrop.remove();
+    modalEl.remove();
+  };
+
+  backdrop.addEventListener('click', closeModal, { once: true });
+  modalEl.querySelectorAll('[data-bs-dismiss="modal"]').forEach((btn) => {
+    btn.addEventListener('click', closeModal, { once: true });
+  });
+
+  fetchPublicProfileData().then((data) => {
+    if (!data) return;
+    const currentModal = document.getElementById('publicProfileModal');
+    if (!currentModal) return;
+    const contentEl = currentModal.querySelector('.modal-content');
+    if (!contentEl) return;
+    const refreshedProfile = buildPublicProfileData({ ...data, fromDatabase: true });
+    contentEl.innerHTML = buildPublicProfileModalContent(refreshedProfile);
+    createChart('publicProfileSkillGapRadar', getSkillGapRadarConfig());
+  });
 };
 
 function renderSeekerJobs() {

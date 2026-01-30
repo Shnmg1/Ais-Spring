@@ -523,7 +523,7 @@ body {
 
 .profile-cover {
   height: 140px;
-  background: linear-gradient(120deg, rgba(var(--app-primary-rgb), 0.25), rgba(0, 0, 0, 0.7));
+  background: url('../resources/images/EYBANNER.png') center/cover no-repeat;
   border-bottom: 1px solid var(--app-border);
 }
 
@@ -555,13 +555,21 @@ body {
 }
 
 .profile-info-card {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow);
-  backdrop-filter: var(--glass-backdrop);
-  -webkit-backdrop-filter: var(--glass-backdrop);
+  background: #ffffff;
+  color: #000000;
+  border: 1px solid rgba(0, 0, 0, 0.1);
   padding: 0.5rem 0.75rem;
   display: inline-block;
+}
+
+.profile-info-card .text-muted,
+.profile-info-card .small {
+  color: #000000 !important;
+}
+
+[data-theme="light"] .profile-hero h4,
+[data-theme="light"] .profile-hero .bi-pencil {
+  color: #ffffff;
 }
 
 .skill-ring {
